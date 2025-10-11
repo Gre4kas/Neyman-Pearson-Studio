@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-lg-4">
         <h2>Параметры</h2>
         <form hx-post="{% url 'calculator:calculate' %}" hx-target="#results-container" hx-indicator="#spinner"
             class="d-flex flex-column gap-3">
@@ -16,14 +16,34 @@
             </button>
         </form>
     </div>
-    <div class="col-md-8">
+    <div class="col-lg-8">
         <h2>Результаты</h2>
         <div id="results-container">
-            <!-- Результаты будут загружены сюда через HTMX -->
             <div class="alert alert-info">
                 Заполните параметры и нажмите "Рассчитать" для получения результатов.
             </div>
         </div>
     </div>
 </div>
+
+{% if user.is_authenticated and history %}
+<div class="mt-5">
+    <h3>Последние 5 расчетов</h3>
+    <div class="list-group">
+        {% for item in history %}
+        <div class="list-group-item">
+            <div class="d-flex w-100 justify-content-between">
+                <h6 class="mb-1">H₀: {{ item.h0_params.dist }} vs H₁: {{ item.h1_params.dist }}</h6>
+                <small>{{ item.created_at|date:"d.m.Y" }}</small>
+            </div>
+            <p class="mb-1">Порог: {{ item.threshold }}, Мощность: {{ item.power }}</p>
+        </div>
+        {% endfor %}
+        <a href="{% url 'calculator:history' %}" class="list-group-item list-group-item-action text-center">
+            <strong>Посмотреть всю историю</strong>
+        </a>
+    </div>
+</div>
+{% endif %}
+
 {% endblock %}
