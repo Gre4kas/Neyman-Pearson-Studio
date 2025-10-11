@@ -13,7 +13,8 @@ def register_view(request: HttpRequest) -> HttpResponse:
         if form.is_valid():
             user = form.save()
             # Автоматически входим в систему после успешной регистрации
-            login(request, user)
+            # Указываем бэкенд для аутентификации
+            login(request, user, backend='apps.users.backends.EmailOrUsernameModelBackend')
             return redirect('home')
     else:
         form = UserRegisterForm()
