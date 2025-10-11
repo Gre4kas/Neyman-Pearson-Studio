@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 
-{% block title %}Результаты теста{% endblock %}
+{% block title %}Результаты теста: {{ quiz.title }}{% endblock %}
 
 {% block content %}
 <div class="text-center">
-    <h1>Результаты теста</h1>
+    <h1>Результаты теста «{{ quiz.title }}»</h1>
     <p class="lead">Вы ответили правильно на <strong>{{ correct_count }}</strong> из <strong>{{ total_questions
             }}</strong> вопросов.</p>
     <h2>Ваш результат: {{ score }}%</h2>
@@ -17,12 +17,20 @@
         <strong>Вопрос:</strong> {{ result.question.text }}
     </div>
     <div class="card-body">
-        {% if result.is_correct %}
-        <p class="text-success"><strong>Ваш ответ:</strong> {{ result.user_answer.text }} (Верно)</p>
-        {% else %}
-        <p class="text-danger"><strong>Ваш ответ:</strong> {{ result.user_answer.text|default:"(ответ не дан)" }}
-            (Неверно)</p>
-        <p class="text-success"><strong>Правильный ответ:</strong> {{ result.correct_answer.text }}</p>
+        <p><strong>Ваш ответ(ы):</strong>
+            {% for answer in result.user_answers %}
+            <span class="badge {% if answer.is_correct %}bg-success{% else %}bg-danger{% endif %}">{{ answer.text
+                }}</span>
+            {% empty %}
+            <span class="badge bg-secondary">(ответ не дан)</span>
+            {% endfor %}
+        </p>
+        {% if not result.is_correct %}
+        <p><strong>Правильный ответ(ы):</strong>
+            {% for answer in result.correct_answers %}
+            <span class="badge bg-success">{{ answer.text }}</span>
+            {% endfor %}
+        </p>
         {% if result.question.explanation %}
         <div class="alert alert-info mt-2">
             <strong>Пояснение:</strong> {{ result.question.explanation }}
@@ -34,7 +42,7 @@
 {% endfor %}
 
 <div class="text-center mt-4">
-    <a href="{% url 'quiz:start' %}" class="btn btn-primary btn-lg">Пройти тест еще раз</a>
+    <a href="{% url 'quiz:list' %}" class="btn btn-primary btn-lg">Выбрать другой тест</a>
     <a href="{% url 'home' %}" class="btn btn-secondary btn-lg">На главную</a>
 </div>
 {% endblock %}

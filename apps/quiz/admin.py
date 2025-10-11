@@ -1,9 +1,9 @@
 from django.contrib import admin
-from .models import Question, Answer, QuizResult
+from .models import Quiz, Question, Answer
 
 class AnswerInline(admin.TabularInline):
     model = Answer
-    extra = 1 # Количество пустых форм для добавления ответов
+    extra = 1
 
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
@@ -11,8 +11,10 @@ class QuestionAdmin(admin.ModelAdmin):
     search_fields = ('text',)
     inlines = [AnswerInline]
 
-@admin.register(QuizResult)
-class QuizResultAdmin(admin.ModelAdmin):
-    list_display = ('user', 'score', 'completed_at')
-    list_filter = ('user',)
-    readonly_fields = ('user', 'score', 'completed_at')
+@admin.register(Quiz)
+class QuizAdmin(admin.ModelAdmin):
+    list_display = ('title', 'created_at')
+    search_fields = ('title',)
+    filter_horizontal = ('questions',)
+
+# admin.site.register(QuizResult)

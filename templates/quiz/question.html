@@ -8,14 +8,6 @@
         data-progress="{{ progress }}"></div>
 </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const progressBar = document.querySelector('.progress-bar');
-        const progress = progressBar.getAttribute('data-progress');
-        progressBar.style.width = progress + '%';
-    });
-</script>
-
 <div class="card">
     <div class="card-header">
         <h3 class="mb-0">Вопрос</h3>
@@ -23,12 +15,12 @@
     <div class="card-body">
         <p class="lead">{{ question.text }}</p>
         <hr>
-        <form action="{% url 'quiz:check_answer' question.id %}" method="post">
+        <form action="{% url 'quiz:check_answer' quiz_id question.id %}" method="post">
             {% csrf_token %}
             <div class="list-group">
                 {% for answer in question.answers.all %}
                 <label class="list-group-item list-group-item-action">
-                    <input type="radio" name="answer" value="{{ answer.id }}" class="form-check-input me-2" required>
+                    <input type="checkbox" name="answer" value="{{ answer.id }}" class="form-check-input me-2">
                     {{ answer.text }}
                 </label>
                 {% endfor %}
@@ -37,4 +29,14 @@
         </form>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const progressBar = document.querySelector('.progress-bar');
+        if (progressBar) {
+            const progress = progressBar.getAttribute('data-progress');
+            progressBar.style.width = progress + '%';
+        }
+    });
+</script>
 {% endblock %}

@@ -1,119 +1,113 @@
-import random
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpRequest, HttpResponse
-from .models import Question, Answer
+from .models import Quiz, Question
 
-SESSION_KEY_QUESTIONS = 'quiz_questions'
-SESSION_KEY_ANSWERS = 'quiz_answers'
-QUESTIONS_COUNT = 5 # Количество вопросов в одном тесте
+def get_session_keys(quiz_id):
+    return f'quiz_{quiz_id}_questions', f'quiz_{quiz_id}_answers'
 
-def quiz_start_view(request: HttpRequest) -> HttpResponse:
-    # Получаем случайные ID вопросов
-    question_ids = list(Question.objects.values_list('id', flat=True))
-    
-    if len(question_ids) < QUESTIONS_COUNT:
-        # Обработка случая, когда вопросов в базе меньше, чем нужно
-        return render(request, 'quiz/quiz_not_enough_questions.html', {'required_count': QUESTIONS_COUNT})
-    
-    selected_ids = random.sample(question_ids, QUESTIONS_COUNT)
-    
-    # Сохраняем ID в сессию и очищаем предыдущие ответы
-    request.session[SESSION_KEY_QUESTIONS] = selected_ids
-    request.session[SESSION_KEY_ANSWERS] = {}
-    
-    # Перенаправляем на первый вопрос
-    first_question_id = selected_ids[0]
-    return redirect('quiz:question', question_id=first_question_id)
+def quiz_list_view(request: HttpRequest) -> HttpResponse:
+    quizzes = Quiz.objects.all()
+    return render(request, 'quiz/quiz_list.html', {'quizzes': quizzes})
 
+def quiz_start_view(request: HttpRequest, quiz_id: int) -> HttpResponse:
+    quiz = get_object_or_404(Quiz, id=quiz_id)
+    question_ids = list(quiz.questions.values_list('id', flat=True))
 
-def question_view(request: HttpRequest, question_id: int) -> HttpResponse:
-    question = get_object_or_404(Question, id=question_id)
-    question_ids = request.session.get(SESSION_KEY_QUESTIONS, [])
+    if not question_ids:
+        return render(request, 'quiz/quiz_not_enough_questions.html', {'quiz': quiz})
+    
+    # Ключи сессии теперь уникальны для каждого теста
+    questions_key, answers_key = get_session_keys(quiz_id)
+
+    request.session[questions_key] = question_ids
+    request.session[answers_key] = {}
+    
+    first_question_id = question_ids[0]
+    return redirect('quiz:question', quiz_id=quiz_id, question_id=first_question_id)
+
+def question_view(request: HttpRequest, quiz_id: int, question_id: int) -> HttpResponse:
+    questions_key, _ = get_session_keys(quiz_id)
+    question_ids = request.session.get(questions_key, [])
     
     if question_id not in question_ids:
-        # Если пытаются получить доступ к вопросу не из текущего теста
-        return redirect('quiz:start')
-        
+        return redirect('quiz:list')
+
+    question = get_object_or_404(Question, id=question_id)
     current_index = question_ids.index(question_id)
     progress = int(((current_index) / len(question_ids)) * 100)
     
     context = {
+        'quiz_id': quiz_id,
         'question': question,
         'progress': progress,
     }
     return render(request, 'quiz/question.html', context)
 
-
-def check_answer_view(request: HttpRequest, question_id: int) -> HttpResponse:
+def check_answer_view(request: HttpRequest, quiz_id: int, question_id: int) -> HttpResponse:
     if request.method != 'POST':
-        return redirect('quiz:question', question_id=question_id)
-
-    question = get_object_or_404(Question, id=question_id)
-    selected_answer_id = request.POST.get('answer')
+        return redirect('quiz:question', quiz_id=quiz_id, question_id=question_id)
     
-    if not selected_answer_id:
-        # Если ответ не был выбран
-        # Можно добавить сообщение об ошибке через Django Messages Framework
-        return redirect('quiz:question', question_id=question_id)
-
-    # Сохраняем ответ пользователя в сессию
-    user_answers = request.session.get(SESSION_KEY_ANSWERS, {})
-    user_answers[str(question_id)] = int(selected_answer_id)
-    request.session[SESSION_KEY_ANSWERS] = user_answers
+    questions_key, answers_key = get_session_keys(quiz_id)
     
-    # Определяем следующий вопрос или переходим к результатам
-    question_ids = request.session.get(SESSION_KEY_QUESTIONS, [])
+    # Используем getlist для получения всех выбранных чекбоксов
+    selected_answer_ids = request.POST.getlist('answer')
+    
+    user_answers = request.session.get(answers_key, {})
+    # Сохраняем список ID ответов, преобразованных в int
+    user_answers[str(question_id)] = [int(aid) for aid in selected_answer_ids]
+    request.session[answers_key] = user_answers
+    
+    question_ids = request.session.get(questions_key, [])
     current_index = question_ids.index(question_id)
     
     if current_index + 1 < len(question_ids):
         next_question_id = question_ids[current_index + 1]
-        return redirect('quiz:question', question_id=next_question_id)
+        return redirect('quiz:question', quiz_id=quiz_id, question_id=next_question_id)
     else:
-        return redirect('quiz:results')
+        return redirect('quiz:results', quiz_id=quiz_id)
 
+def quiz_results_view(request: HttpRequest, quiz_id: int) -> HttpResponse:
+    questions_key, answers_key = get_session_keys(quiz_id)
+    question_ids = request.session.get(questions_key, [])
+    user_answers_map = request.session.get(answers_key, {})
 
-def quiz_results_view(request: HttpRequest) -> HttpResponse:
-    question_ids = request.session.get(SESSION_KEY_QUESTIONS, [])
-    user_answers_map = request.session.get(SESSION_KEY_ANSWERS, {})
+    if not question_ids:
+        return redirect('quiz:list')
 
-    if not question_ids or not user_answers_map:
-        return redirect('quiz:start')
-
+    quiz = get_object_or_404(Quiz, id=quiz_id)
     questions = Question.objects.filter(id__in=question_ids).prefetch_related('answers')
     
     results = []
     correct_count = 0
+    total_questions = len(question_ids)
     
-    for q_id in question_ids:
-        question = next((q for q in questions if q.id == q_id), None)
-        if not question: continue
-
-        user_answer_id = user_answers_map.get(str(q_id))
-        user_answer = next((a for a in question.answers.all() if a.id == user_answer_id), None)
-        correct_answer = next((a for a in question.answers.all() if a.is_correct), None)
+    for question in questions:
+        user_answer_ids = set(user_answers_map.get(str(question.id), []))
+        correct_answer_ids = set(question.answers.filter(is_correct=True).values_list('id', flat=True))
         
-        is_correct = user_answer and user_answer.is_correct
+        is_correct = (user_answer_ids == correct_answer_ids)
         if is_correct:
             correct_count += 1
             
         results.append({
             'question': question,
-            'user_answer': user_answer,
-            'correct_answer': correct_answer,
+            'user_answers': question.answers.filter(id__in=user_answer_ids),
+            'correct_answers': question.answers.filter(is_correct=True),
             'is_correct': is_correct,
         })
     
-    score = (correct_count / len(question_ids)) * 100 if question_ids else 0
+    score = (correct_count / total_questions) * 100 if total_questions else 0
     
     context = {
+        'quiz': quiz,
         'results': results,
         'correct_count': correct_count,
-        'total_questions': len(question_ids),
+        'total_questions': total_questions,
         'score': round(score, 2),
     }
     
-    # Очищаем сессию после показа результатов
-    request.session.pop(SESSION_KEY_QUESTIONS, None)
-    request.session.pop(SESSION_KEY_ANSWERS, None)
+    # Очищаем сессию
+    request.session.pop(questions_key, None)
+    request.session.pop(answers_key, None)
     
     return render(request, 'quiz/results.html', context)
