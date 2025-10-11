@@ -17,22 +17,35 @@
         <strong>Вопрос:</strong> {{ result.question.text }}
     </div>
     <div class="card-body">
-        <p><strong>Ваш ответ(ы):</strong>
+        <h6>Ваш ответ(ы):</h6>
+        <ul class="list-unstyled">
             {% for answer in result.user_answers %}
-            <span class="badge {% if answer.is_correct %}bg-success{% else %}bg-danger{% endif %}">{{ answer.text
-                }}</span>
+            <li>
+                {% if answer in result.correct_answers %}
+                <span class="badge bg-success me-1">✓</span>
+                {% else %}
+                <span class="badge bg-danger me-1">✗</span>
+                {% endif %}
+                {{ answer.text }}
+            </li>
             {% empty %}
-            <span class="badge bg-secondary">(ответ не дан)</span>
+            <li><span class="badge bg-secondary">(ответ не дан)</span></li>
             {% endfor %}
-        </p>
+        </ul>
+
         {% if not result.is_correct %}
-        <p><strong>Правильный ответ(ы):</strong>
+        <h6 class="mt-3">Правильный ответ(ы):</h6>
+        <ul class="list-unstyled">
             {% for answer in result.correct_answers %}
-            <span class="badge bg-success">{{ answer.text }}</span>
+            <li>
+                <span class="badge bg-success me-1">✓</span>
+                {{ answer.text }}
+            </li>
             {% endfor %}
-        </p>
+        </ul>
+
         {% if result.question.explanation %}
-        <div class="alert alert-info mt-2">
+        <div class="alert alert-info mt-2 mb-0">
             <strong>Пояснение:</strong> {{ result.question.explanation }}
         </div>
         {% endif %}
