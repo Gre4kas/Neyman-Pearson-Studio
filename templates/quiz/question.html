@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Тест: {{ question.text|truncatechars:30 }}{% endblock %}
+
+{% block content %}
+<div class="progress mb-4" style="height: 20px;">
+    <div class="progress-bar" role="progressbar" style="width: {{ progress }}%;" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100"></div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="mb-0">Вопрос</h3>
+    </div>
+    <div class="card-body">
+        <p class="lead">{{ question.text }}</p>
+        <hr>
+        <form action="{% url 'quiz:check_answer' question.id %}" method="post">
+            {% csrf_token %}
+            <div class="list-group">
+                {% for answer in question.answers.all %}
+                <label class="list-group-item list-group-item-action">
+                    <input type="radio" name="answer" value="{{ answer.id }}" class="form-check-input me-2" required>
+                    {{ answer.text }}
+                </label>
+                {% endfor %}
+            </div>
+            <button type="submit" class="btn btn-primary mt-4">Ответить</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

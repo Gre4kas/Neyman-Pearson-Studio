@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Результаты теста{% endblock %}
+
+{% block content %}
+<div class="text-center">
+    <h1>Результаты теста</h1>
+    <p class="lead">Вы ответили правильно на <strong>{{ correct_count }}</strong> из <strong>{{ total_questions
+            }}</strong> вопросов.</p>
+    <h2>Ваш результат: {{ score }}%</h2>
+</div>
+<hr>
+
+{% for result in results %}
+<div class="card mb-3 {% if result.is_correct %}border-success{% else %}border-danger{% endif %}">
+    <div class="card-header {% if result.is_correct %}bg-success-subtle{% else %}bg-danger-subtle{% endif %}">
+        <strong>Вопрос:</strong> {{ result.question.text }}
+    </div>
+    <div class="card-body">
+        {% if result.is_correct %}
+        <p class="text-success"><strong>Ваш ответ:</strong> {{ result.user_answer.text }} (Верно)</p>
+        {% else %}
+        <p class="text-danger"><strong>Ваш ответ:</strong> {{ result.user_answer.text|default:"(ответ не дан)" }}
+            (Неверно)</p>
+        <p class="text-success"><strong>Правильный ответ:</strong> {{ result.correct_answer.text }}</p>
+        {% if result.question.explanation %}
+        <div class="alert alert-info mt-2">
+            <strong>Пояснение:</strong> {{ result.question.explanation }}
+        </div>
+        {% endif %}
+        {% endif %}
+    </div>
+</div>
+{% endfor %}
+
+<div class="text-center mt-4">
+    <a href="{% url 'quiz:start' %}" class="btn btn-primary btn-lg">Пройти тест еще раз</a>
+    <a href="{% url 'home' %}" class="btn btn-secondary btn-lg">На главную</a>
+</div>
+{% endblock %}

@@ -7,5 +7,5 @@ urlpatterns = [
     path('', TemplateView.as_view(template_name='index.html'), name='home'),
     path('calculator/', include('apps.calculator.urls')),
     path('theory/', include('apps.theory.urls')),
-    # path('quiz/', include('apps.quiz.urls')),
+    path('quiz/', include('apps.quiz.urls')),
 ]
