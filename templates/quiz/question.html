@@ -4,8 +4,17 @@
 
 {% block content %}
 <div class="progress mb-4" style="height: 20px;">
-    <div class="progress-bar" role="progressbar" style="width: {{ progress }}%;" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100"></div>
+    <div class="progress-bar" role="progressbar" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100"
+        data-progress="{{ progress }}"></div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const progressBar = document.querySelector('.progress-bar');
+        const progress = progressBar.getAttribute('data-progress');
+        progressBar.style.width = progress + '%';
+    });
+</script>
 
 <div class="card">
     <div class="card-header">
