@@ -1,0 +1,84 @@
+{% if error %}
+<div class="alert alert-danger">{{ error }}</div>
+{% endif %}
+
+{% if results %}
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Итоги расчета</h5>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item"><strong>Порог (C):</strong> {{ results.threshold }}</li>
+            <li class="list-group-item"><strong>Мощность критерия (1-β):</strong> {{ results.power }}</li>
+            <li class="list-group-item"><strong>Коэффициент рандомизации (γ):</strong> {{ results.gamma }}</li>
+        </ul>
+    </div>
+</div>
+
+<div class="mt-4">
+    <canvas id="distributionsChart"></canvas>
+</div>
+
+<script>
+    // Ensure this script runs only once or can be re-initialized safely
+    if (window.myChart instanceof Chart) {
+        window.myChart.destroy();
+    }
+
+    const ctx = document.getElementById('distributionsChart').getContext('2d');
+    const plotData = {{ results.plot_data| safe }};
+
+    window.myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: plotData.x,
+            datasets: [{
+                label: 'H₀ PDF',
+                data: plotData.h0_pdf,
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1,
+                pointRadius: 0
+            }, {
+                label: 'H₁ PDF',
+                data: plotData.h1_pdf,
+                borderColor: 'rgb(255, 99, 132)',
+                tension: 0.1,
+                pointRadius: 0
+            }]
+        },
+        options: {
+            animation: false,
+            scales: {
+                x: {
+                    type: 'linear',
+                    title: { display: true, text: 'x' }
+                },
+                y: {
+                    title: { display: true, text: 'Плотность вероятности' }
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Графики плотности распределений'
+                },
+                annotation: {
+                    annotations: {
+                        line1: {
+                            type: 'line',
+                            xMin: {{ results.threshold }},
+        xMax: {{ results.threshold }},
+        borderColor: 'rgb(54, 162, 235)',
+        borderWidth: 2,
+        label: {
+        content: 'Порог C = {{ results.threshold }}',
+        enabled: true,
+        position: 'start'
+    }
+                    }
+                }
+            }
+        }
+    }
+});
+</script>
+{% endif %}

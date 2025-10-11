@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Калькулятор - Neyman-Pearson Studio{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <h2>Параметры</h2>
+        <form hx-post="{% url 'calculator:calculate' %}" hx-target="#results-container" hx-indicator="#spinner"
+            class="d-flex flex-column gap-3">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary">
+                Рассчитать
+                <span id="spinner" class="spinner-border spinner-border-sm htmx-indicator" role="status"></span>
+            </button>
+        </form>
+    </div>
+    <div class="col-md-8">
+        <h2>Результаты</h2>
+        <div id="results-container">
+            <!-- Результаты будут загружены сюда через HTMX -->
+            <div class="alert alert-info">
+                Заполните параметры и нажмите "Рассчитать" для получения результатов.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

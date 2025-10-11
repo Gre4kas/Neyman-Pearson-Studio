@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Главная - Neyman-Pearson Studio{% endblock %}
+
+{% block content %}
+<div class="p-5 mb-4 bg-light rounded-3">
+    <div class="container-fluid py-5">
+        <h1 class="display-5 fw-bold">Критерий Неймана-Пирсона</h1>
+        <p class="col-md-8 fs-4">
+            Интерактивный образовательный инструмент для изучения и применения одного из
+            ключевых понятий в теории принятия решений и статистике.
+        </p>
+        <a href="{% url 'calculator:page' %}" class="btn btn-primary btn-lg" type="button">
+            Перейти к калькулятору
+        </a>
+    </div>
+</div>
+{% endblock %}
