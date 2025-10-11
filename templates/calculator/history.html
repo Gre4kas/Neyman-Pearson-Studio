@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}История расчетов{% endblock %}
+
+{% block content %}
+<h1>История ваших расчетов</h1>
+<p class="lead">Здесь сохранены все ваши предыдущие вычисления.</p>
+
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th scope="col">Дата</th>
+                <th scope="col">α</th>
+                <th scope="col">Гипотеза H₀</th>
+                <th scope="col">Гипотеза H₁</th>
+                <th scope="col">Порог (C)</th>
+                <th scope="col">Мощность (1-β)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in history_list %}
+            <tr>
+                <td>{{ item.created_at|date:"d.m.Y H:i" }}</td>
+                <td>{{ item.alpha }}</td>
+                <td>{{ item.h0_params.dist }} ({{ item.h0_params.param1 }}, {{ item.h0_params.param2 }})</td>
+                <td>{{ item.h1_params.dist }} ({{ item.h1_params.param1 }}, {{ item.h1_params.param2 }})</td>
+                <td>{{ item.threshold }}</td>
+                <td>{{ item.power }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center">У вас пока нет сохраненных расчетов.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
