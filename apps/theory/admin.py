@@ -6,7 +6,7 @@ from .models import Article
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
     list_display = ('title', 'order', 'created_at', 'preview_link')
-    search_fields = ('title', 'content_md', 'content_rich')
+    search_fields = ('title', 'content_rich')
     prepopulated_fields = {'slug': ('title',)}
     list_editable = ('order',)
     
@@ -15,10 +15,10 @@ class ArticleAdmin(admin.ModelAdmin):
             'fields': ('title', 'slug', 'order')
         }),
         ('Содержимое', {
-            'fields': ('content_rich', 'content_md'),
-            'description': 'Используйте визуальный редактор для удобного редактирования с форматированием. '
-                          'Редактор поддерживает жирный текст, курсив, списки, ссылки, изображения, таблицы и код. '
-                          'Markdown поле доступно для дополнительного контроля.'
+            'fields': ('content_rich',),
+            'description': 'Используйте визуальный редактор для создания содержимого. '
+                          'Редактор поддерживает жирный текст, курсив, списки, ссылки, изображения, '
+                          'таблицы, код и математические формулы LaTeX.'
         }),
         ('Автоматически генерируемые поля', {
             'fields': ('content_html', 'preview_content'),
