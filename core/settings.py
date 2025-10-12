@@ -162,15 +162,30 @@ CKEDITOR_5_CONFIGS = {
             'subscript', 'superscript', '|', 'link', 'imageUpload', 
             'blockQuote', 'codeBlock', '|', 'bulletedList', 'numberedList', 
             'todoList', '|', 'outdent', 'indent', '|', 'insertTable', 
-            'tableColumn', 'tableRow', 'mergeTableCells', '|', 'undo', 'redo'
+            'tableColumn', 'tableRow', 'mergeTableCells', '|', 'alignment', '|', 'undo', 'redo'
         ],
         'image': {
-            'toolbar': ['imageTextAlternative', '|', 'imageStyle:alignLeft',
-                        'imageStyle:alignRight', 'imageStyle:alignCenter', 'imageStyle:side',  ],
+            'toolbar': [
+                'imageTextAlternative', '|', 
+                'imageStyle:alignLeft', 'imageStyle:alignRight', 'imageStyle:alignCenter',
+                'imageStyle:side', 'imageStyle:inline'
+            ],
+            'styles': [
+                'alignLeft', 'alignRight', 'alignCenter', 'side', 'inline'
+            ]
         },
         'table': {
-            'contentToolbar': [ 'tableColumn', 'tableRow', 'mergeTableCells',
-                               'tableProperties', 'tableCellProperties' ],
+            'contentToolbar': [ 
+                'tableColumn', 'tableRow', 'mergeTableCells',
+                'tableProperties', 'tableCellProperties' 
+            ],
+            'tableProperties': {
+                'borderColors': [],
+                'backgroundColors': []
+            }
+        },
+        'alignment': {
+            'options': [ 'left', 'center', 'right', 'justify' ]
         },
         'heading' : {
             'options': [

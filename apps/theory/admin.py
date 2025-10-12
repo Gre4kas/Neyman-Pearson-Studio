@@ -146,6 +146,17 @@ class ArticleAdmin(admin.ModelAdmin):
     
     class Media:
         css = {
-            'all': ('admin/css/theory_admin.css', 'admin/css/ckeditor_math.css', 'admin/css/latex_support.css')
+            'all': (
+                'admin/css/theory_admin.css', 
+                'admin/css/ckeditor_math.css', 
+                'admin/css/latex_support.css',
+                'admin/css/ckeditor_improved.css',
+                'css/content_improvements.css'
+            )
         }
-        js = ('admin/js/theory_admin.js', 'admin/js/ckeditor_math.js', 'admin/js/latex_examples.js')
+        js = (
+            'admin/js/theory_admin.js', 
+            'admin/js/ckeditor_math.js', 
+            'admin/js/latex_examples.js',
+            'js/content_enhancements.js'
+        )

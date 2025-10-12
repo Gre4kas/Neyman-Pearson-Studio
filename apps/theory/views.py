@@ -42,23 +42,36 @@ def admin_preview_view(request: HttpRequest) -> JsonResponse:
         processed_content = re.sub(r'<script[^>]*>.*?</script>', '', content, flags=re.IGNORECASE | re.DOTALL)
         processed_content = re.sub(r'<iframe[^>]*>.*?</iframe>', '', processed_content, flags=re.IGNORECASE | re.DOTALL)
         
-        # Убираем элементы CKEditor для вставки параграфов (большие треугольники)
+        # Убираем все служебные элементы CKEditor
         processed_content = re.sub(r'<div[^>]*class="[^"]*ck-widget__type-around[^"]*"[^>]*>.*?</div>', '', processed_content, flags=re.IGNORECASE | re.DOTALL)
         processed_content = re.sub(r'<div[^>]*ck-widget__type-around[^>]*>.*?</div>', '', processed_content, flags=re.IGNORECASE | re.DOTALL)
-        
-        # Убираем другие служебные элементы CKEditor
         processed_content = re.sub(r'<div[^>]*ck-tooltip[^>]*>.*?</div>', '', processed_content, flags=re.IGNORECASE | re.DOTALL)
+        processed_content = re.sub(r'<div[^>]*ck-balloon-panel[^>]*>.*?</div>', '', processed_content, flags=re.IGNORECASE | re.DOTALL)
         processed_content = re.sub(r'<button[^>]*ck-widget__type-around__button[^>]*>.*?</button>', '', processed_content, flags=re.IGNORECASE | re.DOTALL)
         
-        # Убираем пустые параграфы с &nbsp;
+        # Убираем пустые параграфы
         processed_content = re.sub(r'<p[^>]*>&nbsp;</p>', '', processed_content)
         processed_content = re.sub(r'<p[^>]*>\s*</p>', '', processed_content)
+        processed_content = re.sub(r'<p[^>]*>(\s|&nbsp;)*</p>', '', processed_content)
         
-        # Исправляем изображения - убираем ненужные стили CKEditor и добавляем правильные классы
-        processed_content = re.sub(r'<figure[^>]*class="[^"]*image[^"]*"[^>]*>', '<figure class="image">', processed_content, flags=re.IGNORECASE)
-        processed_content = re.sub(r'<figure[^>]*class="[^"]*table[^"]*"[^>]*>', '<figure class="table">', processed_content, flags=re.IGNORECASE)
+        # Нормализуем структуру изображений - сохраняем классы стилей
+        processed_content = re.sub(
+            r'<figure[^>]*class="([^"]*image[^"]*)"([^>]*)>', 
+            lambda m: f'<figure class="{m.group(1).strip()}"{m.group(2)}>', 
+            processed_content, 
+            flags=re.IGNORECASE
+        )
         
-        # Убираем лишние пустые строки
+        # Нормализуем структуру таблиц - сохраняем классы стилей
+        processed_content = re.sub(
+            r'<figure[^>]*class="([^"]*table[^"]*)"([^>]*)>', 
+            lambda m: f'<figure class="{m.group(1).strip()}"{m.group(2)}>', 
+            processed_content, 
+            flags=re.IGNORECASE
+        )
+        
+        # Убираем лишние пробелы между тегами и нормализуем
+        processed_content = re.sub(r'>\s+<', '><', processed_content)
         processed_content = re.sub(r'\n\s*\n\s*\n', '\n\n', processed_content)
         processed_content = processed_content.strip()
         

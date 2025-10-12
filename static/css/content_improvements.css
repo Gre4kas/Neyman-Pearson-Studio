@@ -1,0 +1,309 @@
+/* Дополнительные улучшения стилей для изображений и таблиц */
+
+/* === ИЗОБРАЖЕНИЯ === */
+
+/* Базовые стили для всех изображений в контенте */
+#article-content img,
+#live-preview-content img,
+.preview-content-area img {
+    max-width: 100% !important;
+    height: auto !important;
+    border-radius: 6px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    transition: transform 0.2s ease !important;
+    margin: 15px 0 !important;
+}
+
+/* Эффект при наведении */
+#article-content img:hover,
+#live-preview-content img:hover,
+.preview-content-area img:hover {
+    transform: scale(1.02) !important;
+}
+
+/* Figure элементы для изображений */
+#article-content figure.image,
+#live-preview-content figure.image,
+.preview-content-area figure.image {
+    text-align: center !important;
+    margin: 25px 0 !important;
+    clear: both !important;
+    max-width: 100% !important;
+}
+
+#article-content figure.image img,
+#live-preview-content figure.image img,
+.preview-content-area figure.image img {
+    display: block !important;
+    margin: 0 auto !important;
+}
+
+/* Подписи к изображениям */
+#article-content figure figcaption,
+#live-preview-content figure figcaption,
+.preview-content-area figure figcaption {
+    margin-top: 10px !important;
+    font-size: 14px !important;
+    color: #6c757d !important;
+    font-style: italic !important;
+    text-align: center !important;
+    line-height: 1.4 !important;
+}
+
+/* Классы выравнивания изображений от CKEditor */
+#article-content .image-style-align-left,
+#live-preview-content .image-style-align-left,
+.preview-content-area .image-style-align-left {
+    float: left !important;
+    margin: 10px 20px 10px 0 !important;
+    max-width: 50% !important;
+    text-align: left !important;
+}
+
+#article-content .image-style-align-right,
+#live-preview-content .image-style-align-right,
+.preview-content-area .image-style-align-right {
+    float: right !important;
+    margin: 10px 0 10px 20px !important;
+    max-width: 50% !important;
+    text-align: right !important;
+}
+
+#article-content .image-style-align-center,
+#live-preview-content .image-style-align-center,
+.preview-content-area .image-style-align-center {
+    display: block !important;
+    margin: 25px auto !important;
+    text-align: center !important;
+    float: none !important;
+}
+
+#article-content .image-style-side,
+#live-preview-content .image-style-side,
+.preview-content-area .image-style-side {
+    float: right !important;
+    margin: 10px 0 10px 20px !important;
+    max-width: 50% !important;
+}
+
+/* Поддержка встроенных стилей выравнивания */
+#article-content p[style*="text-align: center"] img,
+#article-content p[style*="text-align:center"] img,
+#live-preview-content p[style*="text-align: center"] img,
+#live-preview-content p[style*="text-align:center"] img,
+.preview-content-area p[style*="text-align: center"] img,
+.preview-content-area p[style*="text-align:center"] img {
+    display: block !important;
+    margin: 20px auto !important;
+    float: none !important;
+}
+
+/* === ТАБЛИЦЫ === */
+
+/* Базовые стили для всех таблиц */
+#article-content table,
+#live-preview-content table,
+.preview-content-area table {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-collapse: collapse !important;
+    margin: 25px 0 !important;
+    font-size: 14px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    background: #fff !important;
+    table-layout: auto !important;
+}
+
+/* Заголовки таблиц */
+#article-content th,
+#live-preview-content th,
+.preview-content-area th {
+    background: linear-gradient(135deg, #495057 0%, #6c757d 100%) !important;
+    color: white !important;
+    border: none !important;
+    padding: 15px 12px !important;
+    text-align: left !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+}
+
+/* Ячейки таблиц */
+#article-content td,
+#live-preview-content td,
+.preview-content-area td {
+    border: none !important;
+    padding: 12px !important;
+    vertical-align: top !important;
+    border-bottom: 1px solid #e9ecef !important;
+}
+
+/* Чередующиеся строки */
+#article-content tbody tr:nth-child(even),
+#live-preview-content tbody tr:nth-child(even),
+.preview-content-area tbody tr:nth-child(even) {
+    background: #f8f9fa !important;
+}
+
+/* Эффект при наведении на строки */
+#article-content tbody tr:hover,
+#live-preview-content tbody tr:hover,
+.preview-content-area tbody tr:hover {
+    background: #e3f2fd !important;
+    transition: background-color 0.2s ease !important;
+}
+
+/* Последняя строка без нижней границы */
+#article-content tbody tr:last-child td,
+#live-preview-content tbody tr:last-child td,
+.preview-content-area tbody tr:last-child td {
+    border-bottom: none !important;
+}
+
+/* Figure элементы для таблиц */
+#article-content figure.table,
+#live-preview-content figure.table,
+.preview-content-area figure.table {
+    text-align: center !important;
+    margin: 25px 0 !important;
+    clear: both !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+}
+
+#article-content figure.table table,
+#live-preview-content figure.table table,
+.preview-content-area figure.table table {
+    display: inline-block !important;
+    text-align: left !important;
+    margin: 0 auto !important;
+}
+
+/* Центрирование через встроенные стили */
+#article-content div[style*="text-align: center"] table,
+#article-content div[style*="text-align:center"] table,
+#article-content p[style*="text-align: center"] table,
+#article-content p[style*="text-align:center"] table,
+#live-preview-content div[style*="text-align: center"] table,
+#live-preview-content div[style*="text-align:center"] table,
+#live-preview-content p[style*="text-align: center"] table,
+#live-preview-content p[style*="text-align:center"] table,
+.preview-content-area div[style*="text-align: center"] table,
+.preview-content-area div[style*="text-align:center"] table,
+.preview-content-area p[style*="text-align: center"] table,
+.preview-content-area p[style*="text-align:center"] table {
+    margin: 25px auto !important;
+    display: inline-block !important;
+}
+
+/* Центрирующие контейнеры */
+#article-content div[style*="text-align: center"],
+#article-content div[style*="text-align:center"],
+#article-content p[style*="text-align: center"],
+#article-content p[style*="text-align:center"],
+#live-preview-content div[style*="text-align: center"],
+#live-preview-content div[style*="text-align:center"],
+#live-preview-content p[style*="text-align: center"],
+#live-preview-content p[style*="text-align:center"],
+.preview-content-area div[style*="text-align: center"],
+.preview-content-area div[style*="text-align:center"],
+.preview-content-area p[style*="text-align: center"],
+.preview-content-area p[style*="text-align:center"] {
+    text-align: center !important;
+}
+
+/* === РЕСПОНСИВНОСТЬ === */
+
+/* Мобильные устройства */
+@media (max-width: 768px) {
+
+    /* Изображения */
+    #article-content .image-style-align-left,
+    #article-content .image-style-align-right,
+    #live-preview-content .image-style-align-left,
+    #live-preview-content .image-style-align-right,
+    .preview-content-area .image-style-align-left,
+    .preview-content-area .image-style-align-right {
+        float: none !important;
+        display: block !important;
+        margin: 20px auto !important;
+        max-width: 100% !important;
+        text-align: center !important;
+    }
+
+    /* Таблицы */
+    #article-content table,
+    #live-preview-content table,
+    .preview-content-area table {
+        font-size: 12px !important;
+        display: block !important;
+        overflow-x: auto !important;
+        white-space: nowrap !important;
+    }
+
+    #article-content th,
+    #article-content td,
+    #live-preview-content th,
+    #live-preview-content td,
+    .preview-content-area th,
+    .preview-content-area td {
+        padding: 8px 6px !important;
+    }
+
+    #article-content figure.table,
+    #live-preview-content figure.table,
+    .preview-content-area figure.table {
+        overflow-x: auto !important;
+    }
+}
+
+/* Планшеты */
+@media (max-width: 1024px) and (min-width: 769px) {
+
+    #article-content .image-style-align-left,
+    #article-content .image-style-align-right,
+    #live-preview-content .image-style-align-left,
+    #live-preview-content .image-style-align-right,
+    .preview-content-area .image-style-align-left,
+    .preview-content-area .image-style-align-right {
+        max-width: 60% !important;
+    }
+}
+
+/* === ОЧИСТКА FLOAT ЭЛЕМЕНТОВ === */
+
+/* Очистка после float изображений */
+#article-content::after,
+#live-preview-content::after,
+.preview-content-area::after {
+    content: "" !important;
+    display: table !important;
+    clear: both !important;
+}
+
+/* Очистка для контейнеров с float элементами */
+#article-content .image-style-align-left+*,
+#article-content .image-style-align-right+*,
+#live-preview-content .image-style-align-left+*,
+#live-preview-content .image-style-align-right+*,
+.preview-content-area .image-style-align-left+*,
+.preview-content-area .image-style-align-right+* {
+    clear: none !important;
+}
+
+/* Принудительная очистка для новых секций */
+#article-content h1,
+#article-content h2,
+#article-content h3,
+#live-preview-content h1,
+#live-preview-content h2,
+#live-preview-content h3,
+.preview-content-area h1,
+.preview-content-area h2,
+.preview-content-area h3 {
+    clear: both !important;
+}
