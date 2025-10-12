@@ -13,7 +13,7 @@
 <article>
     <h1>{{ article.title }}</h1>
     <hr>
-    <div>
+    <div id="article-content">
         {{ article.content_html|safe }}
     </div>
 </article>
@@ -21,4 +21,37 @@
 <div class="mt-4">
     <a href="{% url 'theory:list' %}" class="btn btn-secondary">&larr; Назад к списку статей</a>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Рендерим математические формулы после загрузки контента
+        function renderMath() {
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                const content = document.getElementById('article-content');
+                if (content) {
+                    console.log('Запуск рендеринга MathJax для контента статьи');
+                    window.MathJax.typesetPromise([content]).then(() => {
+                        console.log('MathJax рендеринг завершен успешно');
+                    }).catch(err => {
+                        console.error('Ошибка рендеринга MathJax:', err);
+                    });
+                }
+            } else {
+                console.warn('MathJax не найден, формулы не будут отображены');
+            }
+        }
+
+        // Пробуем рендерить сразу и через небольшую задержку
+        renderMath();
+        setTimeout(renderMath, 500);
+        setTimeout(renderMath, 1500);
+    });
+
+    // Дополнительный рендеринг при изменении контента
+    if (window.MathJax) {
+        window.MathJax.startup.promise.then(() => {
+            console.log('MathJax полностью загружен и готов к работе');
+        });
+    }
+</script>
 {% endblock %}
