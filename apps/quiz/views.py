@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpRequest, HttpResponse
-from .models import Quiz, Question
+from django.contrib.auth.decorators import login_required
+from .models import Quiz, Question, QuizResult
 
 def get_session_keys(quiz_id):
     return f'quiz_{quiz_id}_questions', f'quiz_{quiz_id}_answers'
@@ -95,9 +96,16 @@ def quiz_results_view(request: HttpRequest, quiz_id: int) -> HttpResponse:
             'correct_answers': question.answers.filter(is_correct=True),
             'is_correct': is_correct,
         })
-    
+
     score = (correct_count / total_questions) * 100 if total_questions else 0
-    
+
+    if request.user.is_authenticated:
+        QuizResult.objects.create(
+            user=request.user,
+            quiz=quiz,
+            score=round(score, 2)
+        )
+
     context = {
         'quiz': quiz,
         'results': results,
@@ -111,3 +119,14 @@ def quiz_results_view(request: HttpRequest, quiz_id: int) -> HttpResponse:
     request.session.pop(answers_key, None)
     
     return render(request, 'quiz/results.html', context)
+
+
+@login_required
+def quiz_history_view(request: HttpRequest) -> HttpResponse:
+    results_list = QuizResult.objects.filter(user=request.user) \
+                                     .select_related('quiz') \
+                                     .order_by('-completed_at')
+    context = {
+        'results_list': results_list
+    }
+    return render(request, 'quiz/history.html', context)

@@ -35,6 +35,7 @@
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                                 <!-- Ссылки на будущий профиль и т.д. -->
                                 <li><a class="dropdown-item" href="{% url 'calculator:history' %}">История расчетов</a></li>
+                                <li><a class="dropdown-item" href="{% url 'quiz:history' %}">История тестов</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <form action="{% url 'users:logout' %}" method="post" class="d-inline">
