@@ -9,3 +9,4 @@ redis==5.0.1
 markdown==3.9
 pytest==8.4.2
 pytest-django==4.11.1
+django-ckeditor-5==0.2.12
