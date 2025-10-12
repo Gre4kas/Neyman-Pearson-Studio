@@ -3,7 +3,11 @@ from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.contrib.admin.views.decorators import staff_member_required
+from django.core.files.storage import default_storage
+from django.conf import settings
 import json
+import os
+import uuid
 from .models import Article
 
 def article_list_view(request: HttpRequest) -> HttpResponse:
@@ -88,4 +92,59 @@ def admin_preview_view(request: HttpRequest) -> JsonResponse:
         return JsonResponse({
             'success': False,
             'error': str(e)
+        })
+
+@staff_member_required
+@csrf_exempt
+@require_http_methods(["POST"])
+def upload_image_view(request: HttpRequest) -> JsonResponse:
+    """Загрузка изображений для статей"""
+    try:
+        if 'image' not in request.FILES:
+            return JsonResponse({
+                'success': False,
+                'error': 'Файл не выбран'
+            })
+        
+        image_file = request.FILES['image']
+        
+        # Проверяем тип файла
+        allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml']
+        if image_file.content_type not in allowed_types:
+            return JsonResponse({
+                'success': False,
+                'error': 'Недопустимый тип файла. Разрешены: JPG, PNG, GIF, WebP, SVG'
+            })
+        
+        # Проверяем размер файла (максимум 10MB)
+        if image_file.size > 10 * 1024 * 1024:
+            return JsonResponse({
+                'success': False,
+                'error': 'Файл слишком большой. Максимум 10MB'
+            })
+        
+        # Генерируем уникальное имя файла
+        file_ext = os.path.splitext(image_file.name)[1]
+        unique_filename = f"{uuid.uuid4().hex}{file_ext}"
+        
+        # Создаем путь в папке media/theory/images/
+        file_path = f"theory/images/{unique_filename}"
+        
+        # Сохраняем файл
+        saved_path = default_storage.save(file_path, image_file)
+        
+        # Создаем URL для доступа к файлу
+        file_url = settings.MEDIA_URL + saved_path
+        
+        return JsonResponse({
+            'success': True,
+            'url': file_url,
+            'filename': unique_filename,
+            'original_name': image_file.name
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': f'Ошибка сервера: {str(e)}'
         })
