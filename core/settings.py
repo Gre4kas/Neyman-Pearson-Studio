@@ -162,7 +162,7 @@ CKEDITOR_5_CONFIGS = {
             'subscript', 'superscript', '|', 'link', 'imageUpload', 
             'blockQuote', 'codeBlock', '|', 'bulletedList', 'numberedList', 
             'todoList', '|', 'outdent', 'indent', '|', 'insertTable', 
-            'tableColumn', 'tableRow', 'mergeTableCells', '|', 'undo', 'redo'
+            'tableColumn', 'tableRow', 'mergeTableCells', '|', 'mathType', '|', 'undo', 'redo'
         ],
         'image': {
             'toolbar': ['imageTextAlternative', '|', 'imageStyle:alignLeft',
@@ -179,6 +179,11 @@ CKEDITOR_5_CONFIGS = {
                 { 'model': 'heading2', 'view': 'h2', 'title': 'Heading 2', 'class': 'ck-heading_heading2' },
                 { 'model': 'heading3', 'view': 'h3', 'title': 'Heading 3', 'class': 'ck-heading_heading3' }
             ]
+        },
+        'mathType': {
+            'engine': 'mathjax',
+            'output': 'svg',
+            'packages': 'base, ams'
         }
     }
 }

@@ -13,7 +13,7 @@
 <article>
     <h1>{{ article.title }}</h1>
     <hr>
-    <div>
+    <div id="article-content">
         {{ article.content_html|safe }}
     </div>
 </article>
@@ -21,4 +21,16 @@
 <div class="mt-4">
     <a href="{% url 'theory:list' %}" class="btn btn-secondary">&larr; Назад к списку статей</a>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Рендерим математические формулы после загрузки контента
+        if (window.MathJax && window.MathJax.typesetPromise) {
+            const content = document.getElementById('article-content');
+            window.MathJax.typesetPromise([content]).catch(err => {
+                console.error('Ошибка рендеринга формул:', err);
+            });
+        }
+    });
+</script>
 {% endblock %}

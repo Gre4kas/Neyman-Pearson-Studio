@@ -51,6 +51,6 @@ class ArticleAdmin(admin.ModelAdmin):
     
     class Media:
         css = {
-            'all': ('admin/css/theory_admin.css',)
+            'all': ('admin/css/theory_admin.css', 'admin/css/ckeditor_math.css')
         }
-        js = ('admin/js/theory_admin.js',)
+        js = ('admin/js/theory_admin.js', 'admin/js/ckeditor_math.js')
