@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Quiz, Question, Answer
+from .models import Quiz, Question, Answer, QuizResult
 
 class AnswerInline(admin.TabularInline):
     model = Answer
@@ -17,4 +17,8 @@ class QuizAdmin(admin.ModelAdmin):
     search_fields = ('title',)
     filter_horizontal = ('questions',)
 
-# admin.site.register(QuizResult)
+@admin.register(QuizResult)
+class QuizResultAdmin(admin.ModelAdmin):
+    list_display = ('user', 'quiz', 'score', 'completed_at')
+    list_filter = ('user', 'quiz')
+    readonly_fields = ('user', 'quiz', 'score', 'completed_at')
