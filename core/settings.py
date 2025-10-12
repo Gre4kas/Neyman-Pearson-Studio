@@ -7,10 +7,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 load_dotenv(os.path.join(BASE_DIR, ".env"))
 
-SECRET_KEY = os.getenv("SECRET_KEY")
+SECRET_KEY = os.getenv("SECRET_KEY", "fallback-secret-key-for-development")
+
+# DEBUG должен быть False в production. Управляем через переменную окружения.
 DEBUG = os.getenv("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
+# Specify domain names or IP addresses from which requests are allowed
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
 
 
 # Application definition
@@ -92,6 +95,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / "static"]
+
+# Directory where the `collectstatic` command will collect ALL static files.
+# Nginx will serve files from this folder.
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 
 # Default primary key field type
