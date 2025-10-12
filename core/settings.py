@@ -105,3 +105,6 @@ AUTHENTICATION_BACKENDS = [
     'apps.users.backends.EmailOrUsernameModelBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
+
+# URL for redirection if the user is not authenticated
+LOGIN_URL = 'users:login'
