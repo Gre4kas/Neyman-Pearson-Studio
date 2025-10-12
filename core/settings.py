@@ -25,9 +25,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
-    # Third-party apps
-    'django_ckeditor_5',
-    
     # My apps
     'apps.users',
     'apps.theory',
@@ -123,79 +120,4 @@ LOGIN_URL = 'users:login'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# CKEditor 5 Configuration
-customColorPalette = [
-    {
-        'color': 'hsl(4, 90%, 58%)',
-        'label': 'Red'
-    },
-    {
-        'color': 'hsl(340, 82%, 52%)',
-        'label': 'Pink'
-    },
-    {
-        'color': 'hsl(291, 64%, 42%)',
-        'label': 'Purple'
-    },
-    {
-        'color': 'hsl(262, 52%, 47%)',
-        'label': 'Deep Purple'
-    },
-    {
-        'color': 'hsl(231, 48%, 48%)',
-        'label': 'Indigo'
-    },
-    {
-        'color': 'hsl(207, 90%, 54%)',
-        'label': 'Blue'
-    },
-]
 
-CKEDITOR_5_CONFIGS = {
-    'default': {
-        'toolbar': ['heading', '|', 'bold', 'italic', 'link',
-                    'bulletedList', 'numberedList', 'blockQuote', 'imageUpload', ],
-    },
-    'theory_editor': {
-        'toolbar': [
-            'heading', '|', 'bold', 'italic', 'underline', 'strikethrough',
-            'subscript', 'superscript', '|', 'link', 'imageUpload', 
-            'blockQuote', 'codeBlock', '|', 'bulletedList', 'numberedList', 
-            'todoList', '|', 'outdent', 'indent', '|', 'insertTable', 
-            'tableColumn', 'tableRow', 'mergeTableCells', '|', 'alignment', '|', 'undo', 'redo'
-        ],
-        'image': {
-            'toolbar': [
-                'imageTextAlternative', '|', 
-                'imageStyle:alignLeft', 'imageStyle:alignRight', 'imageStyle:alignCenter',
-                'imageStyle:side', 'imageStyle:inline'
-            ],
-            'styles': [
-                'alignLeft', 'alignRight', 'alignCenter', 'side', 'inline'
-            ]
-        },
-        'table': {
-            'contentToolbar': [ 
-                'tableColumn', 'tableRow', 'mergeTableCells',
-                'tableProperties', 'tableCellProperties' 
-            ],
-            'tableProperties': {
-                'borderColors': [],
-                'backgroundColors': []
-            }
-        },
-        'alignment': {
-            'options': [ 'left', 'center', 'right', 'justify' ]
-        },
-        'heading' : {
-            'options': [
-                { 'model': 'paragraph', 'title': 'Paragraph', 'class': 'ck-heading_paragraph' },
-                { 'model': 'heading1', 'view': 'h1', 'title': 'Heading 1', 'class': 'ck-heading_heading1' },
-                { 'model': 'heading2', 'view': 'h2', 'title': 'Heading 2', 'class': 'ck-heading_heading2' },
-                { 'model': 'heading3', 'view': 'h3', 'title': 'Heading 3', 'class': 'ck-heading_heading3' }
-            ]
-        }
-    }
-}
-
-CKEDITOR_5_UPLOAD_PATH = "uploads/"

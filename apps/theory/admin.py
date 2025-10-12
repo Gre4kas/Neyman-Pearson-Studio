@@ -1,21 +1,29 @@
 from django.contrib import admin
 from django.utils.html import format_html
 from django.urls import reverse
+from django.forms import Textarea
+from django.db import models
 from .models import Article
+import re
 
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
     list_display = ('title', 'order', 'created_at', 'preview_link')
-    search_fields = ('title', 'content_rich')
+    search_fields = ('title', 'content_md')
     prepopulated_fields = {'slug': ('title',)}
     list_editable = ('order',)
+    
+    formfield_overrides = {
+        models.TextField: {'widget': Textarea(attrs={'rows': 20, 'cols': 80})},
+    }
     
     fieldsets = (
         ('Основная информация', {
             'fields': ('title', 'slug', 'order')
         }),
-        ('Содержимое статьи', {
-            'fields': ('content_rich',),
+        ('Содержимое статьи (Markdown)', {
+            'fields': ('content_md', 'markdown_help'),
+            'description': 'Используйте Markdown для форматирования текста. Поддерживаются заголовки, списки, ссылки, изображения, таблицы и формулы LaTeX.'
         }),
         ('Предпросмотр статьи', {
             'fields': ('live_preview_area',),
@@ -23,112 +31,100 @@ class ArticleAdmin(admin.ModelAdmin):
         })
     )
     
-    readonly_fields = ('content_html', 'preview_link', 'live_preview_area')
+    readonly_fields = ('content_html', 'preview_link', 'live_preview_area', 'markdown_help')
     
 
+    def markdown_help(self, obj):
+        """Справка по Markdown"""
+        return format_html('''
+        <div style="background: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; border-radius: 5px; margin-bottom: 10px;">
+            <h4 style="margin-top: 0; color: #495057;">Справка по Markdown:</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; font-size: 12px;">
+                <div>
+                    <strong>Заголовки:</strong><br>
+                    # Заголовок 1<br>
+                    ## Заголовок 2<br>
+                    ### Заголовок 3<br><br>
+                    
+                    <strong>Текст:</strong><br>
+                    **жирный**<br>
+                    *курсив*<br>
+                    `код`<br><br>
+                    
+                    <strong>Списки:</strong><br>
+                    - Элемент списка<br>
+                    1. Нумерованный список<br>
+                </div>
+                <div>
+                    <strong>Ссылки и изображения:</strong><br>
+                    [текст ссылки](URL)<br>
+                    ![alt текст](URL изображения)<br><br>
+                    
+                    <strong>Формулы LaTeX:</strong><br>
+                    $E = mc^2$ - встроенная<br>
+                    $$x = \\frac{{-b \\pm \\sqrt{{b^2-4ac}}}}{{2a}}$$ - блочная<br><br>
+                    
+                    <strong>Таблицы:</strong><br>
+                    | Заголовок | Заголовок |<br>
+                    |-----------|-----------|<br>
+                    | Ячейка    | Ячейка    |<br>
+                </div>
+            </div>
+        </div>
+        ''')
+    
+    markdown_help.short_description = "📚 Справка"
     
     def live_preview_area(self, obj):
-        """Единая область для предпросмотра статьи - как на реальной странице"""
-        # Подготавливаем статистику для уже сохраненного контента
+        """Предпросмотр статьи в формате HTML"""
         stats_html = ""
+        content_html = ""
         
         if obj and obj.content_html:
-            import re
-            
             # Подсчитываем статистику
-            content = obj.content_html
-            
-            # Убираем HTML теги для подсчета чистого текста
-            clean_content = re.sub('<[^<]+?>', ' ', content)
+            clean_content = re.sub('<[^<]+?>', ' ', obj.content_html)
             clean_content = re.sub(r'\s+', ' ', clean_content).strip()
-            clean_content = clean_content.replace('&nbsp;', ' ').replace('&amp;', '&')
             
-            # Статистика
             char_count = len(clean_content)
             word_count = len([w for w in clean_content.split() if w])
+            
             # Подсчет LaTeX формул
-            latex_inline = len(re.findall(r'\$[^$]+\$', content))
-            latex_block = len(re.findall(r'\$\$[^$]+\$\$', content))
+            latex_inline = len(re.findall(r'\$[^$]+\$', obj.content_html))
+            latex_block = len(re.findall(r'\$\$[^$]+\$\$', obj.content_html))
             latex_count = latex_inline + latex_block
             
             stats_html = format_html(
                 '<div style="background: #e8f4f8; border: 1px solid #bee5eb; padding: 8px 12px; margin-bottom: 10px; border-radius: 4px; font-size: 12px; color: #0c5460;">'
-                '<strong>📊 Статистика:</strong> {0} символов • {1} слов • {2} формул (встроенных: {3}, блочных: {4})'
+                '<strong>📊 Статистика:</strong> {} символов • {} слов • {} формул LaTeX'
                 '</div>',
-                char_count, word_count, latex_count, latex_inline, latex_block
+                char_count, word_count, latex_count
             )
-        
+            
+            content_html = obj.content_html
+        else:
+            content_html = '<p style="text-align: center; color: #666; font-style: italic;">Содержимое появится после сохранения статьи</p>'
 
-
-        return format_html(
-            '<style>'
-            '.preview-content-area {{ overflow-wrap: break-word; word-wrap: break-word; max-width: 100%; }}'
-            '.preview-content-area img {{ max-width: 100% !important; height: auto !important; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }}'
-            '.preview-content-area figure {{ margin: 20px 0 !important; max-width: 100% !important; text-align: center; }}'
-            '.preview-content-area figure img {{ display: block; margin: 0 auto; }}'
-            '.preview-content-area figure.table {{ text-align: center; }}'
-            '.preview-content-area figure.table table {{ display: inline-block; text-align: left; }}'
-            '.preview-content-area table {{ border-collapse: collapse; margin: 20px auto; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-radius: 6px; overflow: hidden; }}'
-            '.preview-content-area th {{ background: #f8f9fa; border: 1px solid #dee2e6; padding: 12px 8px; font-weight: 600; }}'
-            '.preview-content-area td {{ border: 1px solid #dee2e6; padding: 10px 8px; }}'
-            '.preview-content-area tbody tr:nth-child(even) {{ background: #f8f9fa; }}'
-            '.preview-content-area .ck-widget__type-around {{ display: none !important; }}'
-            '.preview-content-area .ck-widget__type-around__button {{ display: none !important; }}'
-            '.preview-content-area .ck-tooltip {{ display: none !important; }}'
-            '</style>'
-            '<div id="live-preview-container" style="border: 2px solid #007cba; border-radius: 8px; overflow: hidden; min-height: 300px; max-width: 100%;">'
-            '<div style="background: linear-gradient(90deg, #007cba, #0056b3); color: white; padding: 12px 16px; font-weight: bold; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">'
-            '<span style="font-size: 18px;">👁️</span>'
-            '<span>Предпросмотр статьи (как на сайте)</span>'
-            '<div style="margin-left: auto; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">'
-            '<button type="button" id="refresh-preview-btn" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; transition: all 0.2s;" title="Принудительно обновить предпросмотр">🔄 Обновить</button>'
-            '<div style="font-size: 12px; opacity: 0.9;" id="preview-status">Готов к работе</div>'
-            '</div>'
-            '</div>'
-            '<div style="padding: 15px; background: white; max-width: 100%; overflow: hidden;">'
-            '{0}'  # stats_html
-            # Живой предпросмотр (тоже с MathJax)
-            '<div style="border: 2px dashed #28a745; border-radius: 4px; padding: 15px; background: #f8fff8; max-width: 100%; overflow: hidden;">'
-            '<div style="font-weight: bold; color: #155724; margin-bottom: 10px; font-size: 14px;">🔥 Живой предпросмотр:</div>'
-            '<div id="live-preview-content" class="preview-content-area" style="min-height: 150px; font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif; line-height: 1.6; color: #333; overflow-wrap: break-word; word-wrap: break-word; max-width: 100%;">'
-            '<div style="color: #666; font-style: italic; text-align: center; padding: 40px 20px; border: 2px dashed #ccc; border-radius: 8px; background: #f8f9fa;">'
-            '<div style="font-size: 24px; margin-bottom: 10px;">📝</div>'
-            '<div style="font-size: 16px; margin-bottom: 8px;">Живой предпросмотр готов</div>'
-            '<div style="font-size: 14px; color: #888;">Начните печатать в редакторе выше, чтобы увидеть содержимое здесь</div>'
-            '</div>'
-            '</div>'
-            '</div>'
-            '</div>'
-            '</div>'
-            # MathJax скрипты и стили - как на реальной странице
-            '<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>'
-            '<script>'
-            'if (!window.MathJax) {{'
-            '  window.MathJax = {{'
-            '    tex: {{'
-            '      inlineMath: [["$", "$"]],'
-            '      displayMath: [["$$", "$$"]],'
-            '      processEscapes: true,'
-            '      processEnvironments: true'
-            '    }},'
-            '    options: {{'
-            '      skipHtmlTags: ["script", "noscript", "style", "textarea", "pre", "code", "a"]'
-            '    }},'
-            '    startup: {{'
-            '      ready() {{'
-            '        console.log("MathJax загружен в админке");'
-            '        MathJax.startup.defaultReady();'
-            '      }}'
-            '    }}'
-            '  }};'
-            '}}'
-            '</script>',
-            stats_html
-        )
+        return format_html('''
+            <div style="border: 2px solid #007cba; border-radius: 8px; overflow: hidden;">
+                <div style="background: linear-gradient(90deg, #007cba, #0056b3); color: white; padding: 12px 16px; font-weight: bold;">
+                    <span style="font-size: 18px;">👁️</span> Предпросмотр статьи (HTML)
+                </div>
+                <div style="padding: 15px; background: white;">
+                    {}
+                    <div style="border: 2px dashed #28a745; border-radius: 4px; padding: 15px; background: #f8fff8; max-height: 500px; overflow-y: auto;">
+                        {}
+                    </div>
+                </div>
+            </div>
+            <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+            <script>
+                if (window.MathJax) {{
+                    MathJax.typesetPromise().catch(err => console.log('MathJax error:', err));
+                }}
+            </script>
+        ''', stats_html, content_html)
     
     live_preview_area.short_description = "👁️ Предпросмотр"
-    
-
     
     def preview_link(self, obj):
         """Ссылка на просмотр статьи на сайте"""
@@ -143,20 +139,3 @@ class ArticleAdmin(admin.ModelAdmin):
         return format_html('<span style="color: #999; font-style: italic;">Сначала сохраните статью</span>')
     
     preview_link.short_description = "🌐 Просмотр"
-    
-    class Media:
-        css = {
-            'all': (
-                'admin/css/theory_admin.css', 
-                'admin/css/ckeditor_math.css', 
-                'admin/css/latex_support.css',
-                'admin/css/ckeditor_improved.css',
-                'css/content_improvements.css'
-            )
-        }
-        js = (
-            'admin/js/theory_admin.js', 
-            'admin/js/ckeditor_math.js', 
-            'admin/js/latex_examples.js',
-            'js/content_enhancements.js'
-        )
