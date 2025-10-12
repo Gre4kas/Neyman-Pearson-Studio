@@ -46,9 +46,17 @@ def admin_preview_view(request: HttpRequest) -> JsonResponse:
         processed_content = re.sub(r'<div[^>]*class="[^"]*ck-widget__type-around[^"]*"[^>]*>.*?</div>', '', processed_content, flags=re.IGNORECASE | re.DOTALL)
         processed_content = re.sub(r'<div[^>]*ck-widget__type-around[^>]*>.*?</div>', '', processed_content, flags=re.IGNORECASE | re.DOTALL)
         
+        # Убираем другие служебные элементы CKEditor
+        processed_content = re.sub(r'<div[^>]*ck-tooltip[^>]*>.*?</div>', '', processed_content, flags=re.IGNORECASE | re.DOTALL)
+        processed_content = re.sub(r'<button[^>]*ck-widget__type-around__button[^>]*>.*?</button>', '', processed_content, flags=re.IGNORECASE | re.DOTALL)
+        
         # Убираем пустые параграфы с &nbsp;
         processed_content = re.sub(r'<p[^>]*>&nbsp;</p>', '', processed_content)
         processed_content = re.sub(r'<p[^>]*>\s*</p>', '', processed_content)
+        
+        # Исправляем изображения - убираем ненужные стили CKEditor и добавляем правильные классы
+        processed_content = re.sub(r'<figure[^>]*class="[^"]*image[^"]*"[^>]*>', '<figure class="image">', processed_content, flags=re.IGNORECASE)
+        processed_content = re.sub(r'<figure[^>]*class="[^"]*table[^"]*"[^>]*>', '<figure class="table">', processed_content, flags=re.IGNORECASE)
         
         # Убираем лишние пустые строки
         processed_content = re.sub(r'\n\s*\n\s*\n', '\n\n', processed_content)
