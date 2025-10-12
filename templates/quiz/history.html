@@ -16,7 +16,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for result in results_list %}
+            {% for result in results %}
             <tr>
                 <td>{{ result.quiz.title }}</td>
                 <td>{{ result.score }}</td>
@@ -30,4 +30,43 @@
         </tbody>
     </table>
 </div>
+
+<!-- Пагинация -->
+<nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+        {% if results.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ results.previous_page_number }}" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <span class="page-link" aria-hidden="true">&laquo;</span>
+        </li>
+        {% endif %}
+
+        {% for i in results.paginator.page_range %}
+        {% if results.number == i %}
+        <li class="page-item active" aria-current="page">
+            <span class="page-link">{{ i }}</span>
+        </li>
+        {% else %}
+        <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+        {% endif %}
+        {% endfor %}
+
+        {% if results.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ results.next_page_number }}" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <span class="page-link" aria-hidden="true">&raquo;</span>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
 {% endblock %}

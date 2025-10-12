@@ -4,5 +4,7 @@ from .models import Article
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
     list_display = ('title', 'order', 'created_at')
-    search_fields = ('title', 'content')
+    search_fields = ('title', 'content_md')
     prepopulated_fields = {'slug': ('title',)}
+    fields = ('title', 'slug', 'order', 'content_md', 'content_html')
+    readonly_fields = ('content_html',)

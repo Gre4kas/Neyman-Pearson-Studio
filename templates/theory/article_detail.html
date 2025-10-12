@@ -14,7 +14,7 @@
     <h1>{{ article.title }}</h1>
     <hr>
     <div>
-        {{ article.content|safe|linebreaks }}
+        {{ article.content_html|safe }}
     </div>
 </article>
 

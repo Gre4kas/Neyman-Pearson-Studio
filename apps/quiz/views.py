@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpRequest, HttpResponse
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .models import Quiz, Question, QuizResult
 
 def get_session_keys(quiz_id):
@@ -126,7 +127,18 @@ def quiz_history_view(request: HttpRequest) -> HttpResponse:
     results_list = QuizResult.objects.filter(user=request.user) \
                                      .select_related('quiz') \
                                      .order_by('-completed_at')
+    
+    # Пагинация
+    page = request.GET.get('page', 1)
+    paginator = Paginator(results_list, 10) # 10 элементов на страницу
+    try:
+        results = paginator.page(page)
+    except PageNotAnInteger:
+        results = paginator.page(1)
+    except EmptyPage:
+        results = paginator.page(paginator.num_pages)
+    
     context = {
-        'results_list': results_list
+        'results': results
     }
     return render(request, 'quiz/history.html', context)

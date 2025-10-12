@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpRequest, HttpResponse
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .forms import CalculatorForm
 from .services.neyman_pearson_solver import solve_neyman_pearson
 from .models import CalculationHistory
@@ -52,7 +53,17 @@ def calculate_view(request: HttpRequest) -> HttpResponse:
 @login_required # Только авторизованные пользователи могут видеть эту страницу
 def calculation_history_view(request: HttpRequest) -> HttpResponse:
     history_list = CalculationHistory.objects.filter(user=request.user).order_by('-created_at')
+    
+    page = request.GET.get('page', 1)
+    paginator = Paginator(history_list, 10) # 10 элементов на страницу
+    try:
+        history = paginator.page(page)
+    except PageNotAnInteger:
+        history = paginator.page(1)
+    except EmptyPage:
+        history = paginator.page(paginator.num_pages)
+    
     context = {
-        'history_list': history_list
+        'history': history
     }
     return render(request, 'calculator/history.html', context)
