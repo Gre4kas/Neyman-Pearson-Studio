@@ -16,3 +16,72 @@ form select {
     border: 1px solid #ced4da;
     border-radius: 0.25rem;
 }
+
+/* Стили для математических формул на сайте */
+.math-tex {
+    background-color: #f8f9fa;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-family: 'Times New Roman', serif;
+    border: 1px solid #e9ecef;
+    margin: 0 1px;
+    display: inline-block;
+}
+
+.math-display {
+    display: block;
+    text-align: center;
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    border-left: 4px solid #007bff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Стили для MathJax элементов */
+.MathJax {
+    outline: 0 !important;
+}
+
+.MathJax_Display {
+    text-align: center !important;
+    margin: 1em 0 !important;
+}
+
+/* Стили для статей теории */
+#article-content {
+    line-height: 1.7;
+    font-size: 16px;
+}
+
+#article-content h1,
+#article-content h2,
+#article-content h3 {
+    margin-top: 30px;
+    margin-bottom: 15px;
+    color: #2c3e50;
+}
+
+#article-content p {
+    margin-bottom: 15px;
+    text-align: justify;
+}
+
+#article-content .math-display {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 1px solid #dee2e6;
+    border-left: 4px solid #007bff;
+}
+
+/* Анимация при загрузке формул */
+.math-tex,
+.math-display {
+    transition: all 0.3s ease;
+}
+
+.math-tex:hover,
+.math-display:hover {
+    background-color: #e3f2fd;
+    transform: scale(1.02);
+}

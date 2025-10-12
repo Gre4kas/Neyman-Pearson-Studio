@@ -14,15 +14,13 @@ class ArticleAdmin(admin.ModelAdmin):
         ('Основная информация', {
             'fields': ('title', 'slug', 'order')
         }),
-        ('Содержимое', {
+        ('Содержимое статьи', {
             'fields': ('content_rich',),
-            'description': 'Используйте визуальный редактор для создания содержимого. '
-                          'Редактор поддерживает жирный текст, курсив, списки, ссылки, изображения, '
-                          'таблицы, код и математические формулы LaTeX.'
         }),
-        ('Автоматически генерируемые поля', {
-            'fields': ('content_html', 'preview_content'),
+        ('Предпросмотр и отладка', {
+            'fields': ('preview_content', 'content_html'),
             'classes': ('collapse',),
+            'description': 'Эти поля генерируются автоматически и предназначены для просмотра результата.'
         })
     )
     
@@ -31,23 +29,43 @@ class ArticleAdmin(admin.ModelAdmin):
     def preview_content(self, obj):
         """Показывает превью контента в админке"""
         if obj.content_html:
-            # Ограничиваем длину превью
-            preview = obj.content_html[:500]
-            if len(obj.content_html) > 500:
+            # Очищаем HTML теги для превью
+            import re
+            clean_content = re.sub('<[^<]+?>', '', obj.content_html)
+            preview = clean_content[:300]
+            if len(clean_content) > 300:
                 preview += '...'
-            return format_html('<div style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; background: #f9f9f9;">{}</div>', preview)
-        return "Нет контента"
+            
+            # Также показываем количество символов
+            char_count = len(clean_content)
+            word_count = len(clean_content.split())
+            
+            return format_html(
+                '<div style="max-height: 150px; overflow-y: auto; border: 1px solid #ddd; padding: 12px; background: #f8f9fa; border-radius: 4px; font-size: 13px; line-height: 1.4;">'
+                '<div style="margin-bottom: 8px; color: #666; font-size: 11px;"><strong>📊 Статистика:</strong> {0} символов, {1} слов</div>'
+                '<div style="color: #333;">{2}</div>'
+                '</div>',
+                char_count,
+                word_count, 
+                preview
+            )
+        return format_html('<div style="color: #999; font-style: italic;">Контент не добавлен</div>')
     
-    preview_content.short_description = "Превью контента"
+    preview_content.short_description = "📄 Превью и статистика"
     
     def preview_link(self, obj):
         """Ссылка на просмотр статьи на сайте"""
-        if obj.pk:
+        if obj.pk and obj.slug:
             url = reverse('theory:detail', args=[obj.slug])
-            return format_html('<a href="{}" target="_blank" class="button">Просмотр на сайте</a>', url)
-        return "Сохраните статью для предпросмотра"
+            return format_html(
+                '<a href="{}" target="_blank" class="button" style="background: #28a745; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 12px;">'
+                '🔗 Открыть на сайте'
+                '</a>', 
+                url
+            )
+        return format_html('<span style="color: #999; font-style: italic;">Сначала сохраните статью</span>')
     
-    preview_link.short_description = "Предпросмотр"
+    preview_link.short_description = "🌐 Просмотр"
     
     class Media:
         css = {

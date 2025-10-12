@@ -69,21 +69,37 @@
     <script src="https://unpkg.com/htmx.org@1.9.9"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
-    <!-- MathJax для рендеринга LaTeX формул -->
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- MathJax конфигурация (должна быть ДО загрузки MathJax) -->
     <script>
         window.MathJax = {
             tex: {
                 inlineMath: [['$', '$'], ['\\(', '\\)']],
                 displayMath: [['$$', '$$'], ['\\[', '\\]']],
-                packages: { '[+]': ['base', 'ams'] }
+                processEscapes: true,
+                processEnvironments: true,
+                packages: { '[+]': ['base', 'ams', 'newcommand', 'configmacros'] }
+            },
+            options: {
+                ignoreHtmlClass: 'tex2jax_ignore',
+                processHtmlClass: 'tex2jax_process'
             },
             svg: {
                 fontCache: 'global'
+            },
+            startup: {
+                ready() {
+                    console.log('MathJax загружен и настроен');
+                    MathJax.startup.defaultReady();
+                }
             }
         };
     </script>
+
+    <!-- Polyfill для старых браузеров -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+
+    <!-- MathJax для рендеринга LaTeX формул -->
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </body>
 
 </html>
