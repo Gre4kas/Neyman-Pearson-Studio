@@ -8,4 +8,4 @@ celery==5.3.6
 redis==5.0.1
 pytest==8.4.2
 pytest-django==4.11.1
-django-ckeditor-5==0.2.12
+django-ckeditor-5==0.2.18
