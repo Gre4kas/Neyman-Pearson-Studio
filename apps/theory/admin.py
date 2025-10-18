@@ -67,11 +67,30 @@ class ArticleAdmin(admin.ModelAdmin):
         <div class="collapsible-section">
             <div class="collapsible-header" onclick="toggleCollapsible('image-help')">
                 <span class="icon">📷</span>
-                <span class="title">Загрузка изображений</span>
+                <span class="title">Управление изображениями</span>
                 <span class="arrow">▼</span>
             </div>
             <div class="collapsible-content" id="image-help" style="display: none;">
+                
+                <!-- Каталог загруженных изображений -->
+                <div class="uploaded-images-section">
+                    <div class="section-header">
+                        <h4>📂 Загруженные изображения</h4>
+                        <button type="button" onclick="loadUploadedImages()" class="refresh-btn">🔄 Обновить</button>
+                    </div>
+                    
+                    <div class="images-grid" id="uploadedImagesList">
+                        <div class="loading-message">🔄 Загрузка каталога изображений...</div>
+                    </div>
+                </div>
+                
+                <div class="section-divider"></div>
+                
+                <!-- Загрузка нового изображения -->
                 <div class="upload-section">
+                    <div class="section-header">
+                        <h4>⬆️ Загрузить новое изображение</h4>
+                    </div>
                     <div class="upload-zone" onclick="document.getElementById('imageUpload').click()">
                         <div class="upload-icon">�</div>
                         <div class="upload-text">
@@ -98,10 +117,12 @@ class ArticleAdmin(admin.ModelAdmin):
                     </div>
                 </div>
                 
+                <div class="section-divider"></div>
+                
                 <div class="help-methods">
                     <div class="method">
                         <h5>📤 Загрузка файла:</h5>
-                        <code>Нажмите выше для загрузки изображения</code>
+                        <code>Используйте форму выше для загрузки</code>
                         <p>Файлы сохраняются в <strong>/media/theory/images/</strong></p>
                     </div>
                     <div class="method">
