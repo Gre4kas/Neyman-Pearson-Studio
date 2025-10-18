@@ -8,4 +8,6 @@ urlpatterns = [
     path('<slug:slug>/', views.article_detail_view, name='detail'),
     path('admin/preview/', views.admin_preview_view, name='admin_preview'),
     path('admin/upload-image/', views.upload_image_view, name='upload_image'),
+    path('admin/get-images/', views.get_uploaded_images_view, name='get_images'),
+    path('admin/delete-image/', views.delete_image_view, name='delete_image'),
 ]

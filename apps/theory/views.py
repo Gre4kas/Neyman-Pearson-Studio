@@ -8,6 +8,7 @@ from django.conf import settings
 import json
 import os
 import uuid
+from datetime import datetime
 from .models import Article
 
 def article_list_view(request: HttpRequest) -> HttpResponse:
@@ -147,4 +148,101 @@ def upload_image_view(request: HttpRequest) -> JsonResponse:
         return JsonResponse({
             'success': False,
             'error': f'Ошибка сервера: {str(e)}'
+        })
+
+
+@staff_member_required
+@require_http_methods(["GET"])
+def get_uploaded_images_view(request: HttpRequest) -> JsonResponse:
+    """Получение списка загруженных изображений"""
+    try:
+        images_dir = "theory/images"
+        images = []
+        
+        # Проверяем, существует ли директория
+        if default_storage.exists(images_dir):
+            # Получаем список файлов
+            directories, files = default_storage.listdir(images_dir)
+            
+            for file in files:
+                file_path = f"{images_dir}/{file}"
+                if default_storage.exists(file_path):
+                    # Получаем информацию о файле
+                    file_url = settings.MEDIA_URL + file_path
+                    file_size = default_storage.size(file_path)
+                    
+                    # Пытаемся получить дату создания
+                    try:
+                        # Для локального хранилища
+                        full_path = default_storage.path(file_path)
+                        created_time = os.path.getctime(full_path)
+                        created_date = datetime.fromtimestamp(created_time).strftime('%Y-%m-%d %H:%M')
+                    except:
+                        created_date = "Неизвестно"
+                    
+                    # Определяем размер в удобном формате
+                    if file_size < 1024:
+                        size_str = f"{file_size} Б"
+                    elif file_size < 1024 * 1024:
+                        size_str = f"{file_size // 1024} КБ"
+                    else:
+                        size_str = f"{file_size // (1024 * 1024)} МБ"
+                    
+                    images.append({
+                        'filename': file,
+                        'url': file_url,
+                        'size': size_str,
+                        'created': created_date,
+                        'markdown': f"![Описание]({file_url})"
+                    })
+        
+        # Сортируем по дате создания (новые сверху)
+        images.sort(key=lambda x: x['created'], reverse=True)
+        
+        return JsonResponse({
+            'success': True,
+            'images': images,
+            'count': len(images)
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': f'Ошибка получения изображений: {str(e)}'
+        })
+
+
+@staff_member_required
+@csrf_exempt
+@require_http_methods(["POST"])
+def delete_image_view(request: HttpRequest) -> JsonResponse:
+    """Удаление загруженного изображения"""
+    try:
+        data = json.loads(request.body)
+        filename = data.get('filename')
+        
+        if not filename:
+            return JsonResponse({
+                'success': False,
+                'error': 'Имя файла не указано'
+            })
+        
+        file_path = f"theory/images/{filename}"
+        
+        if default_storage.exists(file_path):
+            default_storage.delete(file_path)
+            return JsonResponse({
+                'success': True,
+                'message': 'Изображение успешно удалено'
+            })
+        else:
+            return JsonResponse({
+                'success': False,
+                'error': 'Файл не найден'
+            })
+            
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': f'Ошибка удаления: {str(e)}'
         })
