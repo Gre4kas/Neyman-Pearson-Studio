@@ -32,9 +32,9 @@ class Answer(models.Model):
     class Meta:
         verbose_name = "Ответ"
         verbose_name_plural = "Ответы"
-
+        
     def __str__(self):
-        return self.text
+        return f"{'✓' if self.is_correct else '✗'}"
 
 class QuizResult(models.Model):
     # Эта модель пока не используется, но оставим ее для будущего
