@@ -70,7 +70,7 @@ class ArticleAdmin(admin.ModelAdmin):
                 <span class="title">Управление изображениями</span>
                 <span class="arrow">▼</span>
             </div>
-            <div class="collapsible-content" id="image-help" style="display: none;">
+            <div class="collapsible-content" id="image-help" aria-hidden="true" style="display:none;">
                 
                 <!-- Каталог загруженных изображений -->
                 <div class="uploaded-images-section">
@@ -97,17 +97,17 @@ class ArticleAdmin(admin.ModelAdmin):
                             <strong>Нажмите для загрузки изображения</strong>
                             <small>или перетащите файл сюда</small>
                         </div>
-                        <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+                        <input type="file" id="imageUpload" accept="image/*" class="visually-hidden">
                     </div>
                     
-                    <div class="upload-progress" id="uploadProgress" style="display: none;">
+                    <div class="upload-progress" id="uploadProgress" style="display:none;">
                         <div class="progress-bar">
                             <div class="progress-fill"></div>
                         </div>
                         <span class="progress-text">Загрузка...</span>
                     </div>
                     
-                    <div class="upload-result" id="uploadResult" style="display: none;">
+                    <div class="upload-result" id="uploadResult" style="display:none;">
                         <div class="result-text">✅ Изображение загружено!</div>
                         <div class="result-code">
                             <strong>Скопируйте код:</strong>
@@ -156,7 +156,7 @@ class ArticleAdmin(admin.ModelAdmin):
                 <span class="title">Справка по Markdown</span>
                 <span class="arrow">▼</span>
             </div>
-            <div class="collapsible-content" id="markdown-help" style="display: none;">
+            <div class="collapsible-content" id="markdown-help" aria-hidden="true" style="display:none;">
                 <div class="help-grid">
                     <div class="help-column">
                         <div class="help-section">
@@ -242,21 +242,34 @@ class ArticleAdmin(admin.ModelAdmin):
                         <span class="preview-title">Предпросмотр</span>
                         <div class="preview-stats">
                             <span class="stat-item">📝 {} слов</span>
-                            <span class="stat-item">� {} символов</span>
+                            <span class="stat-item">✒️ {} символов</span>
                             <span class="stat-item">🧮 {} формул</span>
                         </div>
                     </div>
                     <div class="preview-content">
-                        <div class="rendered-html">{}</div>
+                        <article>
+                            <h1>{}</h1>
+                            <hr>
+                            <div id="article-content">{}</div>
+                        </article>
                     </div>
                 </div>
-                <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
                 <script>
-                    if (window.MathJax) {{
-                        MathJax.typesetPromise().catch(err => console.log('MathJax error:', err));
-                    }}
+                    (function() {{
+                        function renderMath() {{
+                            if (window.MathJax && window.MathJax.typesetPromise) {{
+                                const content = document.getElementById('article-content');
+                                if (content) {{
+                                    window.MathJax.typesetPromise([content]).catch(err => console.error('MathJax error (admin preview):', err));
+                                }}
+                            }}
+                        }}
+                        renderMath();
+                        setTimeout(renderMath, 500);
+                        setTimeout(renderMath, 1500);
+                    }})();
                 </script>
-            ''', word_count, char_count, latex_count, mark_safe(obj.content_html))
+            ''', word_count, char_count, latex_count, mark_safe(obj.title), mark_safe(obj.content_html))
         else:
             return format_html('''
                 <div class="preview-container empty">
@@ -277,7 +290,7 @@ class ArticleAdmin(admin.ModelAdmin):
         if obj.pk and obj.slug:
             url = reverse('theory:detail', args=[obj.slug])
             return format_html(
-                '<a href="{}" target="_blank" class="button" style="background: #28a745; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 12px;">'
+                '<a href="{}" target="_blank" class="button preview-link">'
                 '🔗 Открыть на сайте'
                 '</a>', 
                 url

@@ -83,9 +83,37 @@ def admin_preview_view(request: HttpRequest) -> JsonResponse:
         # НЕ заменяем LaTeX формулы - оставляем их для MathJax
         # Формулы $...$ и $$...$$ остаются как есть, чтобы MathJax их обработал
         
+        # Конвертируем Markdown в HTML (с сохранением LaTeX формул)
+        import markdown as md_mod
+        md_converter = md_mod.Markdown(
+            extensions=[
+                'markdown.extensions.extra',
+                'markdown.extensions.codehilite',
+                'markdown.extensions.toc',
+                'markdown.extensions.nl2br',
+            ]
+        )
+        # processed_content сейчас всё ещё сырой HTML/Markdown перемешанный
+        # Мы ожидаем Markdown во входе, поэтому используем исходный content
+        converted_html = ''
+        try:
+            converted_html = md_converter.convert(content)
+        except Exception:
+            converted_html = processed_content  # fallback
+
+        # Восстанавливаем формулы (markdown могли экранировать) - простой проход не трогаем, оставляем как есть
+
+        wrapped_html = f"""
+        <article>
+            <h1>Предпросмотр статьи</h1>
+            <hr>
+            <div id=\"article-content\">{converted_html}</div>
+        </article>
+        """.strip()
+
         return JsonResponse({
             'success': True,
-            'html': processed_content,
+            'html': wrapped_html,
             'trigger_mathjax': True  # Сигнал для JavaScript что нужно запустить MathJax
         })
         
