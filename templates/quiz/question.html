@@ -13,7 +13,8 @@
         <h3 class="mb-0">Вопрос</h3>
     </div>
     <div class="card-body">
-        <p class="lead">{{ question.text }}</p>
+        {% load quiz_markdown %}
+        <div class="lead">{{ question.text|markdownify }}</div>
         <hr>
         <form action="{% url 'quiz:check_answer' quiz_id question.id %}" method="post">
             {% csrf_token %}
@@ -21,7 +22,7 @@
                 {% for answer in question.answers.all %}
                 <label class="list-group-item list-group-item-action">
                     <input type="checkbox" name="answer" value="{{ answer.id }}" class="form-check-input me-2">
-                    {{ answer.text }}
+                    {{ answer.text|markdownify }}
                 </label>
                 {% endfor %}
             </div>
