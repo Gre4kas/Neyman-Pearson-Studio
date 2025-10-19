@@ -70,7 +70,7 @@ class ArticleAdmin(admin.ModelAdmin):
                 <span class="title">Управление изображениями</span>
                 <span class="arrow">▼</span>
             </div>
-            <div class="collapsible-content" id="image-help" style="display: none;">
+            <div class="collapsible-content" id="image-help" aria-hidden="true" style="display:none;">
                 
                 <!-- Каталог загруженных изображений -->
                 <div class="uploaded-images-section">
@@ -97,17 +97,17 @@ class ArticleAdmin(admin.ModelAdmin):
                             <strong>Нажмите для загрузки изображения</strong>
                             <small>или перетащите файл сюда</small>
                         </div>
-                        <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+                        <input type="file" id="imageUpload" accept="image/*" class="visually-hidden">
                     </div>
                     
-                    <div class="upload-progress" id="uploadProgress" style="display: none;">
+                    <div class="upload-progress" id="uploadProgress" style="display:none;">
                         <div class="progress-bar">
                             <div class="progress-fill"></div>
                         </div>
                         <span class="progress-text">Загрузка...</span>
                     </div>
                     
-                    <div class="upload-result" id="uploadResult" style="display: none;">
+                    <div class="upload-result" id="uploadResult" style="display:none;">
                         <div class="result-text">✅ Изображение загружено!</div>
                         <div class="result-code">
                             <strong>Скопируйте код:</strong>
@@ -156,7 +156,7 @@ class ArticleAdmin(admin.ModelAdmin):
                 <span class="title">Справка по Markdown</span>
                 <span class="arrow">▼</span>
             </div>
-            <div class="collapsible-content" id="markdown-help" style="display: none;">
+            <div class="collapsible-content" id="markdown-help" aria-hidden="true" style="display:none;">
                 <div class="help-grid">
                     <div class="help-column">
                         <div class="help-section">
@@ -290,7 +290,7 @@ class ArticleAdmin(admin.ModelAdmin):
         if obj.pk and obj.slug:
             url = reverse('theory:detail', args=[obj.slug])
             return format_html(
-                '<a href="{}" target="_blank" class="button" style="background: #28a745; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 12px;">'
+                '<a href="{}" target="_blank" class="button preview-link">'
                 '🔗 Открыть на сайте'
                 '</a>', 
                 url
