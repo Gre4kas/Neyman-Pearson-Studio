@@ -4,6 +4,9 @@ from .models import Quiz, Question, Answer, QuizResult
 class AnswerInline(admin.TabularInline):
     model = Answer
     extra = 1
+    verbose_name = "Вариант ответа"
+    verbose_name_plural = "Варианты ответов"
+    show_change_link = True
 
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
