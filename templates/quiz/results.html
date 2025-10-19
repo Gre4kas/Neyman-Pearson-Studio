@@ -5,7 +5,8 @@
 {% block content %}
 <div class="text-center">
     <h1>Результаты теста «{{ quiz.title }}»</h1>
-    <p class="lead">Вы ответили правильно на <strong>{{ correct_count }}</strong> из <strong>{{ total_questions }}</strong> вопросов.</p>
+    <p class="lead">Вы ответили правильно на <strong>{{ correct_count }}</strong> из <strong>{{ total_questions
+            }}</strong> вопросов.</p>
     <h2>Ваш результат: {{ score }}%</h2>
 </div>
 <hr>
@@ -13,7 +14,8 @@
 {% for result in results %}
 <div class="card mb-3 {% if result.is_correct %}border-success{% else %}border-danger{% endif %}">
     <div class="card-header {% if result.is_correct %}bg-success-subtle{% else %}bg-danger-subtle{% endif %}">
-        <strong>Вопрос:</strong> {{ result.question.text }}
+        {% load quiz_markdown %}
+        <strong>Вопрос:</strong> {{ result.question.text|markdownify }}
     </div>
     <div class="card-body">
         <h6>Ваш ответ(ы):</h6>
@@ -25,7 +27,7 @@
                 {% else %}
                 <span class="badge bg-danger me-1">✗</span>
                 {% endif %}
-                {{ answer.text }}
+                {{ answer.text|markdownify }}
             </li>
             {% empty %}
             <li><span class="badge bg-secondary">(ответ не дан)</span></li>
@@ -38,14 +40,14 @@
             {% for answer in result.correct_answers %}
             <li>
                 <span class="badge bg-success me-1">✓</span>
-                {{ answer.text }}
+                {{ answer.text|markdownify }}
             </li>
             {% endfor %}
         </ul>
 
         {% if result.question.explanation %}
         <div class="alert alert-info mt-2 mb-0">
-            <strong>Пояснение:</strong> {{ result.question.explanation }}
+            <strong>Пояснение:</strong> {{ result.question.explanation|markdownify }}
         </div>
         {% endif %}
         {% endif %}
