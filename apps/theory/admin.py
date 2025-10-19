@@ -242,21 +242,34 @@ class ArticleAdmin(admin.ModelAdmin):
                         <span class="preview-title">Предпросмотр</span>
                         <div class="preview-stats">
                             <span class="stat-item">📝 {} слов</span>
-                            <span class="stat-item">� {} символов</span>
+                            <span class="stat-item">✒️ {} символов</span>
                             <span class="stat-item">🧮 {} формул</span>
                         </div>
                     </div>
                     <div class="preview-content">
-                        <div class="rendered-html">{}</div>
+                        <article>
+                            <h1>{}</h1>
+                            <hr>
+                            <div id="article-content">{}</div>
+                        </article>
                     </div>
                 </div>
-                <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
                 <script>
-                    if (window.MathJax) {{
-                        MathJax.typesetPromise().catch(err => console.log('MathJax error:', err));
-                    }}
+                    (function() {{
+                        function renderMath() {{
+                            if (window.MathJax && window.MathJax.typesetPromise) {{
+                                const content = document.getElementById('article-content');
+                                if (content) {{
+                                    window.MathJax.typesetPromise([content]).catch(err => console.error('MathJax error (admin preview):', err));
+                                }}
+                            }}
+                        }}
+                        renderMath();
+                        setTimeout(renderMath, 500);
+                        setTimeout(renderMath, 1500);
+                    }})();
                 </script>
-            ''', word_count, char_count, latex_count, mark_safe(obj.content_html))
+            ''', word_count, char_count, latex_count, mark_safe(obj.title), mark_safe(obj.content_html))
         else:
             return format_html('''
                 <div class="preview-container empty">
