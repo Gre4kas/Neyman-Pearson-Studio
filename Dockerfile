@@ -16,5 +16,11 @@ RUN pip install -r requirements.txt
 # Copy project
 COPY . .
 
-# Collect all static files in the /app/staticfiles/ directory
-RUN python manage.py collectstatic --noinput
+# Create directories for static and media files
+RUN mkdir -p /app/staticfiles /app/media
+
+# Make entrypoint script executable
+RUN chmod +x /app/docker-entrypoint.sh
+
+# We'll collect static files at runtime to ensure env vars are available
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
