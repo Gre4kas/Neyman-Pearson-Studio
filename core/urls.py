@@ -16,7 +16,6 @@ urlpatterns = [
     path('calculator/', include('apps.calculator.urls')),
     path('theory/', include('apps.theory.urls')),
     path('quiz/', include('apps.quiz.urls')),
-    path('ckeditor5/', include('django_ckeditor_5.urls')),
 ]
 
 # Serve media files during development
