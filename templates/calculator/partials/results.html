@@ -14,71 +14,86 @@
     </div>
 </div>
 
-<div class="mt-4">
-    <canvas id="distributionsChart"></canvas>
+<style>
+    /* Увеличенный контейнер графика */
+    #chart-wrapper { min-height: 420px; position: relative; }
+    #chart-wrapper canvas { width: 100% !important; height: 100% !important; }
+</style>
+<div class="mt-4" id="chart-wrapper">
+    <canvas id="distributionsChart" data-threshold="{{ results.threshold }}"></canvas>
 </div>
 
+{# Надёжная передача JSON #}
+{{ results.plot_data|json_script:"plot-data" }}
+
 <script>
-    // Ensure this script runs only once or can be re-initialized safely
-    if (window.myChart instanceof Chart) {
-        window.myChart.destroy();
-    }
+    // Используем глобальную функцию если она определена (внешний файл), иначе fallback на inline
+    function initNPChart(){
+        const jsonNode = document.getElementById('plot-data');
+        const canvasEl = document.getElementById('distributionsChart');
+        if(!jsonNode || !canvasEl || !window.Chart){
+                console.warn('Chart init skipped: missing elements');
+                return;
+        }
+        const rawPlotData = JSON.parse(jsonNode.textContent);
+        const threshold = parseFloat('{{ results.threshold|floatformat:4 }}');
+        const ctx = canvasEl.getContext('2d');
 
-    const ctx = document.getElementById('distributionsChart').getContext('2d');
-    const plotData = {{ results.plot_data| safe }};
+        if (window.neymanPearsonChart && typeof window.neymanPearsonChart.destroy === 'function') {
+            try { window.neymanPearsonChart.destroy(); } catch(e){ console.warn(e); }
+        }
 
-    window.myChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: plotData.x,
-            datasets: [{
-                label: 'H₀ PDF',
-                data: plotData.h0_pdf,
-                borderColor: 'rgb(75, 192, 192)',
-                tension: 0.1,
-                pointRadius: 0
-            }, {
-                label: 'H₁ PDF',
-                data: plotData.h1_pdf,
-                borderColor: 'rgb(255, 99, 132)',
-                tension: 0.1,
-                pointRadius: 0
-            }]
-        },
-        options: {
-            animation: false,
-            scales: {
-                x: {
-                    type: 'linear',
-                    title: { display: true, text: 'x' }
-                },
-                y: {
-                    title: { display: true, text: 'Плотность вероятности' }
+        const drawThresholdPlugin = {
+            id: 'drawThresholdPlugin',
+            afterDraw(chart){
+                const xScale = chart.scales.x; const yScale = chart.scales.y;
+                if(!xScale||!yScale) return;
+                if(threshold < xScale.min || threshold > xScale.max) return;
+                const xPixel = xScale.getPixelForValue(threshold);
+                const c = chart.ctx; c.save();
+                c.strokeStyle='rgb(54,162,235)'; c.lineWidth=2; c.setLineDash([5,4]);
+                c.beginPath(); c.moveTo(xPixel,yScale.top); c.lineTo(xPixel,yScale.bottom); c.stroke();
+                c.fillStyle='rgb(54,162,235)'; c.font='13px sans-serif'; c.textAlign='left'; c.textBaseline='top';
+                c.fillText('Порог C = '+threshold, xPixel+6, yScale.top+6); c.restore();
+            }
+        };
+
+        window.neymanPearsonChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: rawPlotData.x,
+                datasets: [
+                    {label:'H₀ PDF', data: rawPlotData.h0_pdf, borderColor:'rgb(75,192,192)', tension:0.08, pointRadius:0},
+                    {label:'H₁ PDF', data: rawPlotData.h1_pdf, borderColor:'rgb(255,99,132)', tension:0.08, pointRadius:0}
+                ]
+            },
+            options: {
+                responsive:true, maintainAspectRatio:false,
+                interaction:{mode:'nearest', intersect:false},
+                plugins:{ title:{display:true, text:'Плотности f₀(x) и f₁(x)'}, legend:{position:'bottom'}, tooltip:{enabled:true}},
+                scales:{
+                    x:{type:'linear', title:{display:true, text:'x'}},
+                    y:{title:{display:true, text:'Плотность'}, beginAtZero:true, suggestedMax: rawPlotData.max_pdf*1.15}
                 }
             },
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Графики плотности распределений'
-                },
-                annotation: {
-                    annotations: {
-                        line1: {
-                            type: 'line',
-                            xMin: {{ results.threshold }},
-        xMax: {{ results.threshold }},
-        borderColor: 'rgb(54, 162, 235)',
-        borderWidth: 2,
-        label: {
-        content: 'Порог C = {{ results.threshold }}',
-        enabled: true,
-        position: 'start'
-    }
-                    }
-                }
-            }
+            plugins:[drawThresholdPlugin]
+        });
         }
-    }
-});
+        // Первичная инициализация
+        try { initNPChart(); } catch(e){ console.error(e); }
+
+    // Повторная инициализация после htmx замены
+    document.addEventListener('htmx:afterSwap', function(evt){
+         if(evt.target && evt.target.id === 'results-container'){
+                // Даем DOM примениться
+                requestAnimationFrame(()=>{
+                    try { window.neymanPearsonChart && window.neymanPearsonChart.destroy(); } catch(e){}
+                    const scriptTags = document.querySelectorAll('#results-container script');
+                    // Найдём нашу самовызывающуюся функцию и перезапустим через eval безопасно
+                         // Если внешняя функция доступна — вызвать напрямую
+                         if(typeof initNPChart === 'function') { try { initNPChart(); } catch(e){ console.error(e); } }
+                });
+         }
+    });
 </script>
 {% endif %}

@@ -44,8 +44,19 @@ def calculate_view(request: HttpRequest) -> HttpResponse:
                 context = {"form": form, "results": results}
                 return render(request, "calculator/partials/results.html", context)
             except Exception as e:
+                # Возвращаем ошибку в partial но не 400, чтобы htmx корректно обработал swap
                 context = {"error": str(e)}
-                return render(request, "calculator/partials/results.html", context, status=400)
+                return render(request, "calculator/partials/results.html", context)
+        else:
+            # Собираем ошибки формы и возвращаем тот же partial (без графика)
+            error_texts = []
+            for field, errors in form.errors.items():
+                for err in errors:
+                    error_texts.append(f"{field}: {err}")
+            # Добавляем префикс 'error:' чтобы тест мог найти ключевое слово независимо от локализации
+            joined_errors = "; ".join(error_texts) or "Некорректные параметры"
+            context = {"error": f"error: {joined_errors}"}
+            return render(request, "calculator/partials/results.html", context)
 
     form = CalculatorForm()
     return render(request, "calculator/calculator_page.html", {"form": form})
