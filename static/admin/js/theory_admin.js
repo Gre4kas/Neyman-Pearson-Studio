@@ -74,7 +74,7 @@
 
   window.toggleCollapsible = function(id){ const el=document.getElementById(id); if(!el) return; const show = el.style.display==='none'||getComputedStyle(el).display==='none'; el.style.display= show?'block':'none'; const arrow= el.parentElement.querySelector('.collapsible-header .arrow'); if(arrow) arrow.textContent= show?'\u25b2':'\u25bc'; };
 
-  window.loadUploadedImages = function(){ const grid=document.getElementById('uploadedImagesList'); if(!grid) return; grid.innerHTML='<div class="loading-message">\ud83d\udd04 Загрузка каталога изображений...</div>'; fetch('/theory/admin/get-images/')
+  window.loadUploadedImages = function(){ const grid=document.getElementById('uploadedImagesList'); if(!grid) return; grid.innerHTML='<div class="loading-message">\ud83d\udd04 Загрузка каталога изображений...</div>'; fetch('/admin/theory/get-images/')
     .then(r=>r.json())
     .then(data=>{ if(!data.success){ grid.innerHTML='<div class="error">Ошибка: '+(data.error||'Неизвестно')+'</div>'; return;} if(data.count===0){ grid.innerHTML='<div class="empty">Нет изображений</div>'; return;} grid.innerHTML = data.images.map(img=>'<div class="img-card">'+
       '<div class="img-thumb"><img src="'+img.url+'" alt="'+img.filename+'"></div>'+
@@ -88,14 +88,14 @@
     '</div>').join(''); })
     .catch(err=>{ grid.innerHTML='<div class="error">Fetch error: '+err+'</div>'; }); };
 
-  document.addEventListener('click', function(e){ const btn=e.target.closest('button'); if(!btn) return; if(btn.dataset.action==='copy'){ const card=btn.closest('.img-card'); if(!card) return; const input=card.querySelector('.img-md'); if(!input) return; input.select(); document.execCommand('copy'); btn.textContent='\u2705'; setTimeout(()=>{btn.textContent='\ud83d\udccb';},1100); } else if(btn.dataset.action==='delete'){ const fn=btn.dataset.fn; if(!fn) return; if(!confirm('Удалить изображение '+fn+'?')) return; fetch('/theory/admin/delete-image/', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({filename:fn})})
+  document.addEventListener('click', function(e){ const btn=e.target.closest('button'); if(!btn) return; if(btn.dataset.action==='copy'){ const card=btn.closest('.img-card'); if(!card) return; const input=card.querySelector('.img-md'); if(!input) return; input.select(); document.execCommand('copy'); btn.textContent='\u2705'; setTimeout(()=>{btn.textContent='\ud83d\udccb';},1100); } else if(btn.dataset.action==='delete'){ const fn=btn.dataset.fn; if(!fn) return; if(!confirm('Удалить изображение '+fn+'?')) return; fetch('/admin/theory/delete-image/', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({filename:fn})})
       .then(r=>r.json())
       .then(data=>{ if(data.success) loadUploadedImages(); else alert('Ошибка удаления: '+(data.error||'Неизвестно')); })
       .catch(err=> alert('Fetch error: '+err)); } });
 
   (function initUpload(){ const input=document.getElementById('imageUpload'); const zone=document.querySelector('.upload-zone'); if(!input||!zone) return; zone.addEventListener('dragover', e=>{ e.preventDefault(); zone.classList.add('drag'); }); zone.addEventListener('dragleave', ()=> zone.classList.remove('drag')); zone.addEventListener('drop', e=>{ e.preventDefault(); zone.classList.remove('drag'); if(e.dataTransfer.files && e.dataTransfer.files[0]){ input.files=e.dataTransfer.files; uploadFile(input.files[0]); } }); zone.addEventListener('click', ()=> input.click()); input.addEventListener('change', ()=>{ if(input.files[0]) uploadFile(input.files[0]); }); })();
 
-  function uploadFile(file){ const progress=document.getElementById('uploadProgress'); const fill= progress?progress.querySelector('.progress-fill'):null; const result=document.getElementById('uploadResult'); const codeInput=document.getElementById('generatedCode'); if(!file) return; if(progress) progress.style.display='block'; if(result) result.style.display='none'; const formData=new FormData(); formData.append('image', file); fetch('/theory/admin/upload-image/', {method:'POST', body:formData})
+  function uploadFile(file){ const progress=document.getElementById('uploadProgress'); const fill= progress?progress.querySelector('.progress-fill'):null; const result=document.getElementById('uploadResult'); const codeInput=document.getElementById('generatedCode'); if(!file) return; if(progress) progress.style.display='block'; if(result) result.style.display='none'; const formData=new FormData(); formData.append('image', file); fetch('/admin/theory/upload-image/', {method:'POST', body:formData})
     .then(r=>r.json())
     .then(data=>{ if(data.success){ if(fill) fill.style.width='100%'; if(progress) progress.style.display='none'; if(result) result.style.display='block'; if(codeInput) codeInput.value='!['+(data.original_name||'Описание')+']('+data.url+')'; loadUploadedImages(); } else { alert('Ошибка загрузки: '+(data.error||'Неизвестно')); if(progress) progress.style.display='none'; } })
     .catch(err=>{ alert('Fetch error: '+err); if(progress) progress.style.display='none'; }); }
