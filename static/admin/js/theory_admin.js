@@ -330,55 +330,60 @@
     console.log('Инициализация загрузки изображений...');
     isInitialized = true;
 
-    // Делаем файловый инпут более доступным
+    // Делаем файловый инпут более доступным для Docker
+    fileInput.style.position = 'absolute';
+    fileInput.style.opacity = '0';
+    fileInput.style.width = '100%';
+    fileInput.style.height = '100%';
+    fileInput.style.cursor = 'pointer';
     fileInput.style.pointerEvents = 'auto';
+    fileInput.style.zIndex = '1';
+
+    // Делаем drop zone относительным для правильного позиционирования input
+    dropZone.style.position = 'relative';
 
     // Drag & Drop обработчики
-    dropZone.addEventListener('dragover', handleDragOver);
-    dropZone.addEventListener('dragleave', handleDragLeave);
-    dropZone.addEventListener('drop', handleDrop);
+    dropZone.addEventListener('dragover', handleDragOver, false);
+    dropZone.addEventListener('dragleave', handleDragLeave, false);
+    dropZone.addEventListener('drop', handleDrop, false);
 
-    // Click обработчик
+    // Click обработчик для drop zone
     dropZone.addEventListener('click', (event) => {
-      console.log('Click на upload-zone, isUploading:', isUploading);
+      console.log('Click на upload-zone, цель:', event.target.tagName, 'isUploading:', isUploading);
+      
+      // Если клик был на самом файловом input, не вмешиваемся
+      if (event.target === fileInput) {
+        console.log('Клик на файловом input, пропускаем');
+        return;
+      }
+      
+      // Предотвращаем всплытие для других элементов
+      event.preventDefault();
+      event.stopPropagation();
       
       if (!isUploading) {
-        console.log('Открываем диалог выбора файла');
+        console.log('Открываем диалог выбора файла через клик');
         
-        // Используем несколько способов для надежности
-        try {
-          // Способ 1: прямой клик
-          fileInput.click();
-        } catch (e) {
-          console.warn('Прямой клик не сработал, пробуем альтернативный способ:', e);
-          // Способ 2: создаем событие клика
-          try {
-            const clickEvent = new MouseEvent('click', {
-              view: window,
-              bubbles: true,
-              cancelable: true
-            });
-            fileInput.dispatchEvent(clickEvent);
-          } catch (e2) {
-            console.error('Все способы вызова диалога не сработали:', e2);
-          }
-        }
+        // Используем простой и надежный способ
+        fileInput.click();
       } else {
         console.log('Загрузка уже в процессе, игнорируем клик');
-        event.preventDefault();
-        event.stopPropagation();
       }
     });
 
     // File input change обработчик  
     fileInput.addEventListener('change', (event) => {
       console.log('File input change событие, файлов выбрано:', event.target.files.length);
+      
+      if (isUploading) {
+        console.log('Загрузка уже в процессе, игнорируем изменение файла');
+        return;
+      }
+      
       const file = event.target.files[0];
-      if (file && !isUploading) {
+      if (file) {
         console.log('Файл выбран, начинаем загрузку:', file.name);
         uploadFile(file);
-      } else if (file && isUploading) {
-        console.log('Файл выбран, но загрузка уже в процессе');
       } else {
         console.log('Файл не выбран');
       }
@@ -387,11 +392,18 @@
 
   function handleDragOver(event) {
     event.preventDefault();
+    event.stopPropagation();
+    event.dataTransfer.dropEffect = 'copy';
     event.currentTarget.classList.add('drag');
   }
 
   function handleDragLeave(event) {
-    event.currentTarget.classList.remove('drag');
+    event.preventDefault();
+    event.stopPropagation();
+    // Проверяем, что мы действительно покинули зону, а не перешли на дочерний элемент
+    if (!event.currentTarget.contains(event.relatedTarget)) {
+      event.currentTarget.classList.remove('drag');
+    }
   }
 
   function handleDrop(event) {
@@ -399,11 +411,16 @@
     event.stopPropagation();
     event.currentTarget.classList.remove('drag');
 
-    const files = event.dataTransfer.files;
-    if (files && files[0] && !isUploading) {
-      // Не устанавливаем fileInput.files, чтобы избежать двойного срабатывания
-      // Сразу загружаем файл
+    console.log('Drop событие произошло');
+    
+    const files = event.dataTransfer?.files;
+    if (files && files.length > 0 && !isUploading) {
+      console.log('Файл перетащен:', files[0].name);
       uploadFile(files[0]);
+    } else if (isUploading) {
+      console.log('Загрузка уже в процессе, игнорируем drop');
+    } else {
+      console.log('Файлы не найдены в drop событии');
     }
   }
 
@@ -424,13 +441,7 @@
     const validation = validateImageFile(file);
     if (!validation.valid) {
       alert(`Ошибка: ${validation.error}`);
-      isUploading = false; // Сбрасываем флаг при ошибке
-      console.log('Ошибка валидации, флаг isUploading сброшен');
-      
-      // Очищаем input при ошибке валидации
-      const fileInputEl = document.getElementById('imageUpload');
-      if (fileInputEl) fileInputEl.value = '';
-      
+      resetUploadState();
       return;
     }
 
@@ -485,13 +496,8 @@
             // Перезагружаем список изображений
             loadUploadedImages();
 
-            // Сбрасываем флаг загрузки
-            isUploading = false;
-            console.log('Загрузка завершена, флаг isUploading сброшен');
-
-            // Очищаем input после завершения операции
-            const fileInput = document.getElementById('imageUpload');
-            if (fileInput) fileInput.value = '';
+            // Сбрасываем состояние загрузки
+            resetUploadState();
 
           }, 500);
 
@@ -506,14 +512,33 @@
         // Скрываем прогресс
         if (progressContainer) progressContainer.style.display = 'none';
 
-        // Сбрасываем флаг загрузки при ошибке
-        isUploading = false;
-        console.log('Ошибка загрузки, флаг isUploading сброшен');
-
-        // Очищаем input при ошибке
-        const fileInput = document.getElementById('imageUpload');
-        if (fileInput) fileInput.value = '';
+        // Сбрасываем состояние при ошибке
+        resetUploadState();
       });
+  }
+
+  function resetUploadState() {
+    console.log('Сбрасываем состояние загрузки...');
+    
+    // Сбрасываем флаг загрузки
+    isUploading = false;
+    
+    // Очищаем input асинхронно для предотвращения конфликтов
+    setTimeout(() => {
+      const fileInput = document.getElementById('imageUpload');
+      if (fileInput) {
+        fileInput.value = '';
+        console.log('Input очищен');
+      }
+    }, 100);
+    
+    // Скрываем прогресс
+    const progressContainer = document.getElementById('uploadProgress');
+    if (progressContainer) {
+      progressContainer.style.display = 'none';
+    }
+    
+    console.log('Состояние загрузки успешно сброшено');
   }
 
   function validateImageFile(file) {
@@ -580,30 +605,62 @@
 
   // === Инициализация ===
 
+  function tryInitializeUpload(attempt = 1, maxAttempts = 10) {
+    console.log(`Попытка инициализации загрузки изображений: ${attempt}/${maxAttempts}`);
+    
+    const uploadZone = document.querySelector('.upload-zone');
+    const fileInput = document.getElementById('imageUpload');
+    
+    if (uploadZone && fileInput) {
+      console.log('Элементы найдены, инициализируем загрузку');
+      initializeImageUpload();
+      return true;
+    } else {
+      console.log(`Элементы не найдены (uploadZone: ${!!uploadZone}, fileInput: ${!!fileInput})`);
+      if (attempt < maxAttempts) {
+        setTimeout(() => tryInitializeUpload(attempt + 1, maxAttempts), 300);
+      } else {
+        console.error('Не удалось найти элементы загрузки после максимального количества попыток');
+      }
+      return false;
+    }
+  }
+
+  function tryLoadImages(attempt = 1, maxAttempts = 5) {
+    const imagesList = document.getElementById('uploadedImagesList');
+    if (imagesList) {
+      console.log('Загружаем список изображений');
+      loadUploadedImages();
+    } else if (attempt < maxAttempts) {
+      setTimeout(() => tryLoadImages(attempt + 1, maxAttempts), 500);
+    }
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
     console.log('Инициализация Theory Admin JS');
 
     ensureMathJax(function () {
       setupLivePreview();
 
-      // Проверяем с задержкой, что элементы загрузки появились в DOM
-      setTimeout(function () {
-        console.log('Поиск элементов для инициализации загрузки изображений...');
-        const uploadZone = document.querySelector('.upload-zone');
-        const fileInput = document.getElementById('imageUpload');
-        console.log('Upload zone найден:', !!uploadZone);
-        console.log('File input найден:', !!fileInput);
-
-        initializeImageUpload();
-      }, 200);
-
-      // Загружаем изображения с небольшой задержкой
-      setTimeout(function () {
-        if (document.getElementById('uploadedImagesList')) {
-          loadUploadedImages();
-        }
-      }, 700);
+      // Инициализируем загрузку с повторными попытками
+      setTimeout(() => tryInitializeUpload(), 100);
+      
+      // Загружаем изображения с повторными попытками
+      setTimeout(() => tryLoadImages(), 500);
     });
   });
+
+  // Дополнительная инициализация для случаев, когда DOM уже загружен
+  if (document.readyState === 'loading') {
+    // DOM еще загружается, обработчик уже установлен выше
+  } else {
+    // DOM уже загружен, запускаем инициализацию сразу
+    console.log('DOM уже готов, запускаем инициализацию немедленно');
+    ensureMathJax(function () {
+      setupLivePreview();
+      setTimeout(() => tryInitializeUpload(), 50);
+      setTimeout(() => tryLoadImages(), 300);
+    });
+  }
 
 })();

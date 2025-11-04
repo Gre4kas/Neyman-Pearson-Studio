@@ -16,7 +16,7 @@ RUN pip install -r requirements.txt
 COPY . .
 
 # Create directories for static and media files
-RUN mkdir -p /app/staticfiles /app/media
+RUN mkdir -p /app/staticfiles /app/media /app/media/theory /app/media/theory/images
 
 # Make entrypoint script executable
 RUN chmod +x /app/docker-entrypoint.sh
