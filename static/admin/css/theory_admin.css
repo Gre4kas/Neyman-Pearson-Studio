@@ -360,6 +360,7 @@
     background: #f9fbfc;
     text-align: center;
     position: relative;
+    user-select: none;
 }
 
 .upload-zone:hover {
@@ -370,6 +371,11 @@
 .upload-zone.drag {
     background: #dce9f5;
     border-color: var(--admin-color-accent);
+}
+
+.upload-zone:active {
+    transform: scale(0.98);
+    background: #e0ebf6;
 }
 
 .upload-zone .upload-text strong {
