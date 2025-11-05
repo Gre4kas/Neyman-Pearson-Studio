@@ -5,7 +5,7 @@
 {% block content %}
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{% url 'theory:list' %}">Теория</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'theory:list' %}">Теорія</a></li>
         <li class="breadcrumb-item active" aria-current="page">{{ article.title }}</li>
     </ol>
 </nav>
@@ -19,7 +19,7 @@
 </article>
 
 <div class="mt-4">
-    <a href="{% url 'theory:list' %}" class="btn btn-secondary">&larr; Назад к списку статей</a>
+    <a href="{% url 'theory:list' %}" class="btn btn-secondary">&larr; Назад до списку статей</a>
 </div>
 
 <script>

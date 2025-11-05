@@ -5,22 +5,22 @@
 {% block content %}
 <div class="row">
     <div class="col-lg-4">
-        <h2>Параметры</h2>
+        <h2>Параметри</h2>
         <form hx-post="{% url 'calculator:calculate' %}" hx-target="#results-container" hx-indicator="#spinner"
             class="d-flex flex-column gap-3">
             {% csrf_token %}
             {{ form.as_p }}
             <button type="submit" class="btn btn-primary">
-                Рассчитать
+                Розрахувати
                 <span id="spinner" class="spinner-border spinner-border-sm htmx-indicator" role="status"></span>
             </button>
         </form>
     </div>
     <div class="col-lg-8">
-        <h2>Результаты</h2>
+        <h2>Результати</h2>
         <div id="results-container">
             <div class="alert alert-info">
-                Заполните параметры и нажмите "Рассчитать" для получения результатов.
+                Заповніть параметри и натисніть "Розрахувати" для отримання результатів.
             </div>
         </div>
     </div>
@@ -28,7 +28,7 @@
 
 {% if user.is_authenticated and history %}
 <div class="mt-5">
-    <h3>Последние 5 расчетов</h3>
+    <h3>Останні 5 розрахунків</h3>
     <div class="list-group">
         {% for item in history %}
         <div class="list-group-item">
@@ -40,7 +40,7 @@
         </div>
         {% endfor %}
         <a href="{% url 'calculator:history' %}" class="list-group-item list-group-item-action text-center">
-            <strong>Посмотреть всю историю</strong>
+            <strong>Подивитися всю історію</strong>
         </a>
     </div>
 </div>

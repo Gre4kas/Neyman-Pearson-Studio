@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %}Недостаточно вопросов{% endblock %}
+{% block title %}Недостатньо питань{% endblock %}
 
 {% block content %}
 <div class="alert alert-warning text-center">
     <h1>Ошибка</h1>
     <p class="lead">
-        Для начала теста необходимо как минимум <strong>{{ required_count }}</strong> вопросов в базе.
+        Для початку теста необхідно як мінімум <strong>{{ required_count }}</strong> питань в базі.
         <br>
         Пожалуйста, добавьте больше вопросов через <a href="/admin/quiz/question/">админ-панель</a>.
     </p>

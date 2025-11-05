@@ -5,11 +5,11 @@
 {% if results %}
 <div class="card">
     <div class="card-body">
-        <h5 class="card-title">Итоги расчета</h5>
+        <h5 class="card-title">Висновки розрахунку</h5>
         <ul class="list-group list-group-flush">
             <li class="list-group-item"><strong>Порог (C):</strong> {{ results.threshold }}</li>
-            <li class="list-group-item"><strong>Мощность критерия (1-β):</strong> {{ results.power }}</li>
-            <li class="list-group-item"><strong>Коэффициент рандомизации (γ):</strong> {{ results.gamma }}</li>
+            <li class="list-group-item"><strong>Потужність критерія (1-β):</strong> {{ results.power }}</li>
+            <li class="list-group-item"><strong>Коефіцієнт рандомізації (γ):</strong> {{ results.gamma }}</li>
         </ul>
     </div>
 </div>
@@ -70,10 +70,10 @@
             options: {
                 responsive:true, maintainAspectRatio:false,
                 interaction:{mode:'nearest', intersect:false},
-                plugins:{ title:{display:true, text:'Плотности f₀(x) и f₁(x)'}, legend:{position:'bottom'}, tooltip:{enabled:true}},
+                plugins:{ title:{display:true, text:'щільності f₀(x) и f₁(x)'}, legend:{position:'bottom'}, tooltip:{enabled:true}},
                 scales:{
                     x:{type:'linear', title:{display:true, text:'x'}},
-                    y:{title:{display:true, text:'Плотность'}, beginAtZero:true, suggestedMax: rawPlotData.max_pdf*1.15}
+                    y:{title:{display:true, text:'щільность'}, beginAtZero:true, suggestedMax: rawPlotData.max_pdf*1.15}
                 }
             },
             plugins:[drawThresholdPlugin]

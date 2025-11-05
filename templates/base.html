@@ -21,8 +21,8 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item"><a class="nav-link" href="{% url 'theory:list' %}">Теория</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'quiz:list' %}">Тесты</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'theory:list' %}">Теорія</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'quiz:list' %}">Тести</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'calculator:page' %}">Калькулятор</a></li>
                 </ul>
 
@@ -32,29 +32,29 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                             data-bs-toggle="dropdown" aria-expanded="false">
-                            Здравствуйте, {{ user.username }}!
+                            Вітаю, {{ user.username }}!
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                             <!-- Ссылки на будущий профиль и т.д. -->
-                            <li><a class="dropdown-item" href="{% url 'calculator:history' %}">История расчетов</a></li>
-                            <li><a class="dropdown-item" href="{% url 'quiz:history' %}">История тестов</a></li>
+                            <li><a class="dropdown-item" href="{% url 'calculator:history' %}">Історія розрахунків</a></li>
+                            <li><a class="dropdown-item" href="{% url 'quiz:history' %}">Історія тестів</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
                             <li>
                                 <form action="{% url 'users:logout' %}" method="post" class="d-inline">
                                     {% csrf_token %}
-                                    <button type="submit" class="dropdown-item">Выйти</button>
+                                    <button type="submit" class="dropdown-item">Вийти</button>
                                 </form>
                             </li>
                         </ul>
                     </li>
                     {% else %}
                     <li class="nav-item">
-                        <a href="{% url 'users:login' %}" class="btn btn-outline-light me-2">Войти</a>
+                        <a href="{% url 'users:login' %}" class="btn btn-outline-light me-2">Увійти</a>
                     </li>
                     <li class="nav-item">
-                        <a href="{% url 'users:register' %}" class="btn btn-primary">Регистрация</a>
+                        <a href="{% url 'users:register' %}" class="btn btn-primary">Реєстрація</a>
                     </li>
                     {% endif %}
                 </ul>

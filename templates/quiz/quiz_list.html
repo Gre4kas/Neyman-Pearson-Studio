@@ -4,17 +4,17 @@
 
 {% block content %}
 <h1>Выберите тест</h1>
-<p class="lead">Проверьте свои знания, пройдя один из доступных тестов.</p>
+<p class="lead">Перевірте свої знання, пройшовши один з доступних тестів.</p>
 
 <div class="list-group">
     {% for quiz in quizzes %}
     <a href="{% url 'quiz:start' quiz.id %}" class="list-group-item list-group-item-action">
         <h5 class="mb-1">{{ quiz.title }}</h5>
-        <small>{{ quiz.questions.count }} вопросов</small>
+        <small>{{ quiz.questions.count }} Питань</small>
     </a>
     {% empty %}
     <div class="alert alert-warning">
-        Тестов пока нет. Добавьте их через <a href="/admin/">админ-панель</a>.
+        Тестів поки немає. Додайте їх через <a href="/admin/">адмін-панель</a>.
     </div>
     {% endfor %}
 </div>

@@ -4,8 +4,8 @@
 
 {% block content %}
 <div class="text-center">
-    <h1>Результаты теста «{{ quiz.title }}»</h1>
-    <p class="lead">Вы ответили правильно на <strong>{{ correct_count }}</strong> из <strong>{{ total_questions }}</strong> вопросов.</p>
+    <h1>Результати теста «{{ quiz.title }}»</h1>
+    <p class="lead">Ви відповіли правильно на <strong>{{ correct_count }}</strong> з <strong>{{ total_questions }}</strong> питань.</p>
     <h2>Ваш результат: {{ score }}%</h2>
 </div>
 <hr>
@@ -14,10 +14,10 @@
 <div class="card mb-3 {% if result.is_correct %}border-success{% else %}border-danger{% endif %}">
     <div class="card-header {% if result.is_correct %}bg-success-subtle{% else %}bg-danger-subtle{% endif %}">
         {% load quiz_markdown %}
-        <strong>Вопрос:</strong> {{ result.question.text|markdownify }}
+        <strong>Питання:</strong> {{ result.question.text|markdownify }}
     </div>
     <div class="card-body">
-        <h6>Ваш ответ(ы):</h6>
+        <h6>Ваша відповідь(і):</h6>
         <ul class="list-unstyled">
             {% for answer in result.user_answers %}
             <li>
@@ -29,12 +29,12 @@
                 {{ answer.text|markdownify }}
             </li>
             {% empty %}
-            <li><span class="badge bg-secondary">(ответ не дан)</span></li>
+            <li><span class="badge bg-secondary">(відповідь не надана)</span></li>
             {% endfor %}
         </ul>
 
         {% if not result.is_correct %}
-        <h6 class="mt-3">Правильный ответ(ы):</h6>
+        <h6 class="mt-3">Правильна відповідь(і):</h6>
         <ul class="list-unstyled">
             {% for answer in result.correct_answers %}
             <li>
@@ -46,7 +46,7 @@
 
         {% if result.question.explanation %}
         <div class="alert alert-info mt-2 mb-0">
-            <strong>Пояснение:</strong> {{ result.question.explanation|markdownify }}
+            <strong>Пояснення:</strong> {{ result.question.explanation|markdownify }}
         </div>
         {% endif %}
         {% endif %}
@@ -55,7 +55,7 @@
 {% endfor %}
 
 <div class="text-center mt-4">
-    <a href="{% url 'quiz:list' %}" class="btn btn-primary btn-lg">Выбрать другой тест</a>
-    <a href="{% url 'home' %}" class="btn btn-secondary btn-lg">На главную</a>
+    <a href="{% url 'quiz:list' %}" class="btn btn-primary btn-lg">Вибрати другий тест</a>
+    <a href="{% url 'home' %}" class="btn btn-secondary btn-lg">На головну</a>
 </div>
 {% endblock %}

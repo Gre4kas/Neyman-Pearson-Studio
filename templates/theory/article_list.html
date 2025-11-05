@@ -1,23 +1,23 @@
 {% extends "base.html" %}
 
-{% block title %}Теория - Neyman-Pearson Studio{% endblock %}
+{% block title %}Теорія - Neyman-Pearson Studio{% endblock %}
 
 {% block content %}
-<h1>Теоретические материалы</h1>
-<p class="lead">Здесь собраны статьи, объясняющие основы критерия Неймана-Пирсона.</p>
+<h1>Теоретичний матеріал</h1>
+<p class="lead">Тут зібрані статті, які пояснюють основи критерія Неймана-Пірсона.</p>
 
 <div class="list-group">
     {% for article in articles %}
     <a href="{% url 'theory:detail' article.slug %}" class="list-group-item list-group-item-action">
         <div class="d-flex w-100 justify-content-between">
             <h5 class="mb-1">{{ article.title }}</h5>
-            <small>Опубликовано: {{ article.created_at|date:"d.m.Y" }}</small>
+            <small>Опубліковано: {{ article.created_at|date:"d.m.Y" }}</small>
         </div>
-        <p class="mb-1">Нажмите, чтобы прочитать статью.</p>
+        <p class="mb-1">Натисніть, щоб прочитати статью.</p>
     </a>
     {% empty %}
     <div class="alert alert-warning">
-        Статей пока нет. Добавьте их через <a href="/admin/">админ-панель</a>.
+        Статей поки немає. Додайте їх через <a href="/admin/">адмін-панель</a>.
     </div>
     {% endfor %}
 </div>

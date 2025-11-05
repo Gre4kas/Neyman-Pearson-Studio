@@ -9,14 +9,14 @@ def get_distribution(dist_name, param1, param2):
     param2 для всех используемых распределений является scale / sigma / шириной и должен быть > 0.
     """
     if param2 <= 0:
-        raise ValueError("Параметр scale/σ/ширина должен быть > 0")
+        raise ValueError("Параметр scale/σ/ширина має бути > 0")
     if dist_name == 'norm':
         return stats.norm(loc=param1, scale=param2)
     if dist_name == 'uniform':
         return stats.uniform(loc=param1, scale=param2)
     if dist_name == 'expon':
         return stats.expon(loc=param1, scale=param2)
-    raise ValueError(f"Не поддерживаемое распределение: {dist_name}")
+    raise ValueError(f"Не підтримує розподіл: {dist_name}")
 
 def solve_neyman_pearson(data: dict) -> dict:
     """Основная логика критерия Неймана–Пирсона (упрощённый вариант).
@@ -36,7 +36,7 @@ def solve_neyman_pearson(data: dict) -> dict:
         interval_end = h0.ppf(0.999)
         c_threshold = brentq(find_c_func, interval_start, interval_end)
     except ValueError:
-        raise ValueError("Не удалось найти уникальный порог. Проверьте параметры распределений и alpha.")
+        raise ValueError("Не вдалося знайти унікальний порог. Перевірте параметри розподілу и alpha.")
 
     power = h1.sf(c_threshold)
     gamma = 0.0  # В этой упрощённой реализации рандомизация не используется
