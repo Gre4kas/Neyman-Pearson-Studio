@@ -360,6 +360,7 @@
     background: #f9fbfc;
     text-align: center;
     position: relative;
+    user-select: none;
 }
 
 .upload-zone:hover {
@@ -370,6 +371,11 @@
 .upload-zone.drag {
     background: #dce9f5;
     border-color: var(--admin-color-accent);
+}
+
+.upload-zone:active {
+    transform: scale(0.98);
+    background: #e0ebf6;
 }
 
 .upload-zone .upload-text strong {
@@ -777,4 +783,327 @@
 
 .theme-classic .preview-content tbody tr:nth-child(even) {
     background: #f8f9fa;
+}
+
+/* === Улучшенные стили для загрузки изображений === */
+
+/* Upload zone */
+.upload-zone {
+    border: 2px dashed var(--admin-border);
+    border-radius: var(--admin-radius-lg);
+    padding: 30px 20px;
+    text-align: center;
+    background: var(--admin-surface);
+    cursor: pointer;
+    transition: all var(--admin-transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.upload-zone:hover {
+    border-color: var(--admin-color-accent);
+    background: #f8fafc;
+}
+
+.upload-zone.drag {
+    border-color: var(--admin-color-accent);
+    background: #e6f3ff;
+    transform: scale(1.02);
+}
+
+.upload-zone .upload-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.6;
+}
+
+.upload-zone .upload-text {
+    font-size: var(--admin-font);
+    color: var(--admin-color-text);
+}
+
+.upload-zone .upload-text strong {
+    display: block;
+    font-size: var(--admin-font-lg);
+    margin-bottom: 4px;
+}
+
+.upload-zone .upload-text small {
+    font-size: var(--admin-font-sm);
+    color: var(--admin-color-text-subtle);
+}
+
+/* Progress bar */
+.upload-progress {
+    margin-top: 16px;
+    padding: 16px;
+    border: 1px solid var(--admin-border-subtle);
+    border-radius: var(--admin-radius);
+    background: var(--admin-surface);
+}
+
+.progress-bar {
+    width: 100%;
+    height: 6px;
+    background: #e9ecef;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--admin-color-accent) 0%, #4dabf7 100%);
+    width: 0%;
+    transition: width 0.3s ease;
+    border-radius: 3px;
+}
+
+.progress-text {
+    font-size: var(--admin-font-sm);
+    color: var(--admin-color-text-subtle);
+    text-align: center;
+}
+
+/* Upload result */
+.upload-result {
+    margin-top: 16px;
+    padding: 16px;
+    border: 1px solid var(--admin-color-success);
+    border-radius: var(--admin-radius);
+    background: var(--admin-color-success-bg);
+}
+
+.result-text {
+    font-size: var(--admin-font);
+    color: var(--admin-color-success);
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+.result-code {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.result-code strong {
+    font-size: var(--admin-font-sm);
+    color: var(--admin-color-text-subtle);
+}
+
+.result-code input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-sm);
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: var(--admin-font-sm);
+    background: var(--admin-surface);
+}
+
+/* Images grid */
+.images-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.img-card {
+    border: 1px solid var(--admin-border-subtle);
+    border-radius: var(--admin-radius);
+    background: var(--admin-surface);
+    overflow: hidden;
+    transition: all var(--admin-transition);
+}
+
+.img-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.img-thumb {
+    height: 160px;
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.img-thumb img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover;
+    border-radius: var(--admin-radius-sm);
+}
+
+.img-meta {
+    padding: 12px;
+    border-bottom: 1px solid var(--admin-border-subtle);
+}
+
+.img-meta .filename {
+    font-size: var(--admin-font-sm);
+    font-weight: 600;
+    color: var(--admin-color-text);
+    margin-bottom: 4px;
+    word-break: break-all;
+}
+
+.img-meta .created {
+    font-size: var(--admin-font-xs);
+    color: var(--admin-color-text-mute);
+}
+
+.img-size {
+    padding: 8px 12px;
+    font-size: var(--admin-font-xs);
+    color: var(--admin-color-text-subtle);
+    background: #f8f9fa;
+    border-bottom: 1px solid var(--admin-border-subtle);
+}
+
+.img-md {
+    width: 100%;
+    padding: 8px 12px;
+    border: none;
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: var(--admin-font-xs);
+    background: var(--admin-code-inline-bg);
+    border-bottom: 1px solid var(--admin-border-subtle);
+    resize: none;
+}
+
+.img-actions {
+    padding: 8px;
+    display: flex;
+    gap: 6px;
+    justify-content: flex-end;
+    background: #f8f9fa;
+}
+
+.btn-small {
+    padding: 6px 10px;
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-sm);
+    background: var(--admin-surface);
+    font-size: var(--admin-font-xs);
+    cursor: pointer;
+    transition: all var(--admin-transition);
+}
+
+.btn-small:hover {
+    background: #f8f9fa;
+}
+
+.btn-copy:hover {
+    background: var(--admin-color-success-bg);
+    border-color: var(--admin-color-success);
+}
+
+.btn-delete:hover {
+    background: var(--admin-color-danger-bg);
+    border-color: var(--admin-color-danger);
+    color: var(--admin-color-danger);
+}
+
+.btn-small:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Loading and error states */
+.loading-message,
+.empty,
+.error {
+    padding: 40px 20px;
+    text-align: center;
+    border: 1px solid var(--admin-border-subtle);
+    border-radius: var(--admin-radius);
+    background: var(--admin-surface);
+    margin-top: 16px;
+}
+
+.loading-message {
+    color: var(--admin-color-text-subtle);
+    font-size: var(--admin-font);
+}
+
+.empty {
+    color: var(--admin-color-text-mute);
+    font-size: var(--admin-font);
+}
+
+.error {
+    background: var(--admin-color-danger-bg);
+    border-color: var(--admin-color-danger-border);
+    color: var(--admin-color-danger);
+    font-size: var(--admin-font);
+}
+
+/* Copy button */
+.copy-btn {
+    padding: 8px 16px;
+    background: var(--admin-color-accent);
+    color: white;
+    border: none;
+    border-radius: var(--admin-radius-sm);
+    cursor: pointer;
+    font-size: var(--admin-font-sm);
+    transition: all var(--admin-transition);
+}
+
+.copy-btn:hover {
+    background: var(--admin-color-accent-hover);
+}
+
+/* Refresh button */
+.refresh-btn {
+    padding: 6px 12px;
+    background: var(--admin-surface);
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-sm);
+    cursor: pointer;
+    font-size: var(--admin-font-sm);
+    transition: all var(--admin-transition);
+}
+
+.refresh-btn:hover {
+    background: #f8f9fa;
+}
+
+/* Section dividers */
+.section-divider {
+    height: 1px;
+    background: var(--admin-border-subtle);
+    margin: 20px 0;
+}
+
+/* Section headers */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.section-header h4 {
+    margin: 0;
+    font-size: var(--admin-font-lg);
+    color: var(--admin-color-text);
+}
+
+/* Utility classes */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }

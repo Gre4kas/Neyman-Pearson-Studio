@@ -91,8 +91,8 @@ class ArticleAdmin(admin.ModelAdmin):
                     <div class="section-header">
                         <h4>⬆️ Загрузить новое изображение</h4>
                     </div>
-                    <div class="upload-zone" onclick="document.getElementById('imageUpload').click()">
-                        <div class="upload-icon">�</div>
+                    <div class="upload-zone">
+                        <div class="upload-icon">📤</div>
                         <div class="upload-text">
                             <strong>Нажмите для загрузки изображения</strong>
                             <small>или перетащите файл сюда</small>

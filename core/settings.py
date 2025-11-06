@@ -13,7 +13,33 @@ SECRET_KEY = os.getenv("SECRET_KEY", "fallback-secret-key-for-development")
 DEBUG = os.getenv("DEBUG", "False") == "True"
 
 # Specify domain names or IP addresses from which requests are allowed
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "127.0.0.1,localhost,app,0.0.0.0,*").split(",")
+
+# CSRF настройки для Docker окружения
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost',
+    'http://127.0.0.1',
+    'http://0.0.0.0',
+    'http://localhost:80',
+    'http://127.0.0.1:80',
+    'http://app:8000',
+    'http://nginx',
+    'http://nginx:80',
+]
+
+# Дополнительные настройки для работы за reverse proxy (nginx)
+USE_TZ = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+CSRF_COOKIE_SECURE = False  # False для HTTP в development
+SESSION_COOKIE_SECURE = False  # False для HTTP в development
+CSRF_COOKIE_HTTPONLY = False  # Позволяем JavaScript читать CSRF токен
+CSRF_COOKIE_SAMESITE = 'Lax'  # Разрешаем cross-site запросы для AJAX
+CSRF_USE_SESSIONS = False  # Используем cookie-based CSRF token
+CSRF_COOKIE_DOMAIN = None  # Автоматическое определение домена
+
+# Настройки для корректной загрузки файлов в Docker
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
 
 
 # Application definition
@@ -119,5 +145,13 @@ LOGIN_URL = 'users:login'
 # Media files (User uploads)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Дополнительные настройки для production media файлов
+if not DEBUG:
+    # В production media файлы должны обслуживаться Nginx
+    # Убеждаемся что MEDIA_ROOT существует
+    import os
+    os.makedirs(MEDIA_ROOT, exist_ok=True)
+    os.makedirs(os.path.join(MEDIA_ROOT, 'theory', 'images'), exist_ok=True)
 
 

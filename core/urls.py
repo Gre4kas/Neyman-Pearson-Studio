@@ -18,6 +18,17 @@ urlpatterns = [
     path('quiz/', include('apps.quiz.urls')),
 ]
 
-# Serve media files during development
+# Serve media files during development and for admin uploads
+# В production Nginx будет обслуживать /media/, но Django admin нужен доступ для загрузки
+from django.views.static import serve
+from django.urls import re_path
+
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+else:
+    # В production добавляем только для admin загрузок
+    urlpatterns += [
+        re_path(r'^media/(?P<path>.*)$', serve, {
+            'document_root': settings.MEDIA_ROOT,
+        }),
+    ]
