@@ -3,12 +3,31 @@
 
   // === Утилиты ===
 
-  // Получение CSRF токена
+  // Получение CSRF токена - улучшенная версия для Docker
   function getCSRFToken() {
+    // Сначала пробуем получить из cookies
     const cookieValue = document.cookie
       .split('; ')
       .find(row => row.startsWith('csrftoken='));
-    return cookieValue ? cookieValue.split('=')[1] : null;
+    
+    if (cookieValue) {
+      return cookieValue.split('=')[1];
+    }
+    
+    // Если не найден в cookies, ищем в мета-теге
+    const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+    if (csrfMeta) {
+      return csrfMeta.getAttribute('content');
+    }
+    
+    // Если не найден в мета-теге, ищем в скрытом input
+    const csrfInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
+    if (csrfInput) {
+      return csrfInput.value;
+    }
+    
+    console.warn('CSRF токен не найден');
+    return null;
   }
 
   // Debounce функция
@@ -91,16 +110,37 @@
       controller = new AbortController();
       setLoading(true);
 
+      const csrfToken = getCSRFToken();
+      if (!csrfToken) {
+        console.error('CSRF токен не найден');
+        previewContainer.innerHTML = `<div class="error-message">❌ Ошибка: CSRF токен не найден</div>`;
+        setLoading(false);
+        return;
+      }
+
       fetch(window.location.origin + '/theory/admin/preview/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-CSRFToken': getCSRFToken()
+          'X-CSRFToken': csrfToken
         },
         body: JSON.stringify({ content }),
         signal: controller.signal
       })
-        .then(response => response.json())
+        .then(response => {
+          // Проверяем статус ответа
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+          
+          // Проверяем Content-Type
+          const contentType = response.headers.get('content-type');
+          if (!contentType || !contentType.includes('application/json')) {
+            throw new Error('Ответ сервера не является JSON');
+          }
+          
+          return response.json();
+        })
         .then(data => {
           if (data.success) {
             previewContainer.innerHTML = data.html;
@@ -112,11 +152,13 @@
             });
           } else {
             console.error('Preview error:', data.error);
+            previewContainer.innerHTML = `<div class="error-message">❌ Ошибка: ${data.error || 'Неизвестная ошибка'}</div>`;
           }
         })
         .catch(err => {
           if (err.name !== 'AbortError') {
             console.error('Preview fetch error:', err);
+            previewContainer.innerHTML = `<div class="error-message">❌ Ошибка загрузки предпросмотра: ${err.message}</div>`;
           }
         })
         .finally(() => setLoading(false));
@@ -152,16 +194,28 @@
 
     grid.innerHTML = '<div class="loading-message">🔄 Загрузка каталога изображений...</div>';
 
+    const csrfToken = getCSRFToken();
+    if (!csrfToken) {
+      grid.innerHTML = '<div class="error">❌ Ошибка: CSRF токен не найден</div>';
+      return;
+    }
+
     fetch('/theory/admin/get-images/', {
       method: 'GET',
       headers: {
-        'X-CSRFToken': getCSRFToken()
+        'X-CSRFToken': csrfToken
       }
     })
       .then(response => {
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
+        
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          throw new Error('Ответ сервера не является JSON');
+        }
+        
         return response.json();
       })
       .then(data => {
@@ -273,6 +327,12 @@
       return;
     }
 
+    const csrfToken = getCSRFToken();
+    if (!csrfToken) {
+      alert('❌ Ошибка: CSRF токен не найден. Попробуйте перезагрузить страницу.');
+      return;
+    }
+
     button.disabled = true;
     button.textContent = '⏳';
 
@@ -280,7 +340,7 @@
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-CSRFToken': getCSRFToken()
+        'X-CSRFToken': csrfToken
       },
       body: JSON.stringify({ filename: filename })
     })
@@ -288,6 +348,12 @@
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
+        
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          throw new Error('Ответ сервера не является JSON');
+        }
+        
         return response.json();
       })
       .then(data => {
@@ -460,11 +526,20 @@
     const formData = new FormData();
     formData.append('image', file);
 
+    // Проверяем CSRF токен
+    const csrfToken = getCSRFToken();
+    if (!csrfToken) {
+      console.error('CSRF токен не найден для загрузки');
+      alert('❌ Ошибка: CSRF токен не найден. Попробуйте перезагрузить страницу.');
+      resetUploadState();
+      return;
+    }
+
     // Отправляем запрос
     fetch('/theory/admin/upload-image/', {
       method: 'POST',
       headers: {
-        'X-CSRFToken': getCSRFToken()
+        'X-CSRFToken': csrfToken
       },
       body: formData
     })
@@ -472,6 +547,12 @@
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
+        
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          throw new Error('Ответ сервера не является JSON');
+        }
+        
         return response.json();
       })
       .then(data => {

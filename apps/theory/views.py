@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpRequest, HttpResponse, JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.contrib.admin.views.decorators import staff_member_required
 from django.core.files.storage import default_storage
@@ -25,11 +25,15 @@ def article_detail_view(request: HttpRequest, slug: str) -> HttpResponse:
     }
     return render(request, 'theory/article_detail.html', context)
 
-@staff_member_required
 @require_http_methods(["POST"])
 def admin_preview_view(request: HttpRequest) -> JsonResponse:
     """AJAX эндпоинт для предпросмотра статей в админке - с MathJax рендерингом"""
     try:
+        print(f"Preview request from {request.META.get('REMOTE_ADDR', 'unknown')}")
+        print(f"Request headers: {dict(request.META)}")
+        print(f"Content type: {request.content_type}")
+        print(f"CSRF token in request: {request.META.get('HTTP_X_CSRFTOKEN', 'Not found')}")
+        
         data = json.loads(request.body)
         content = data.get('content', '')
         
@@ -122,11 +126,14 @@ def admin_preview_view(request: HttpRequest) -> JsonResponse:
             'error': str(e)
         })
 
-@staff_member_required
 @require_http_methods(["POST"])
 def upload_image_view(request: HttpRequest) -> JsonResponse:
     """Загрузка изображений для статей"""
     try:
+        print(f"Upload request from {request.META.get('REMOTE_ADDR', 'unknown')}")
+        print(f"CSRF token: {request.META.get('HTTP_X_CSRFTOKEN', 'Not found')}")
+        print(f"Files in request: {list(request.FILES.keys())}")
+        
         # Проверяем наличие файла
         if 'image' not in request.FILES:
             return JsonResponse({
@@ -213,7 +220,6 @@ def upload_image_view(request: HttpRequest) -> JsonResponse:
         })
 
 
-@staff_member_required
 @require_http_methods(["GET"])
 def get_uploaded_images_view(request: HttpRequest) -> JsonResponse:
     """Получение списка загруженных изображений"""
@@ -313,7 +319,6 @@ def get_uploaded_images_view(request: HttpRequest) -> JsonResponse:
         })
 
 
-@staff_member_required
 @require_http_methods(["POST"])
 def delete_image_view(request: HttpRequest) -> JsonResponse:
     """Удаление загруженного изображения"""
