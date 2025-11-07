@@ -111,7 +111,7 @@
 .preview-stats {
     margin-left: auto;
     font-size: var(--font-size-sm);
-    color: var(--text-secondary);
+    color: var(--primary-blue-dark);
     display: flex;
     gap: var(--space-md);
 }
