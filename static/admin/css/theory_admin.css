@@ -221,7 +221,8 @@
     user-select: none;
     font-size: var(--font-size-md);
     color: var(--text-primary);
-    background: var(--bg-primary);
+    background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+    border-bottom: 1px solid var(--border-medium);
     transition: all var(--transition-fast);
     font-family: var(--font-primary);
 }
@@ -233,14 +234,16 @@
 
 .collapsible-header .arrow {
     margin-left: auto;
-    font-size: var(--font-size-sm);
-    color: var(--text-tertiary);
+    font-size: var(--font-size-md);
+    color: var(--primary-blue);
+    font-weight: bold;
     transition: all var(--transition-fast);
 }
 
 .collapsible-header:hover {
-    background: var(--bg-secondary);
-    color: var(--primary-blue);
+    background: linear-gradient(135deg, var(--primary-blue-light), var(--bg-secondary));
+    color: var(--primary-blue-dark);
+    box-shadow: var(--shadow-subtle);
 }
 
 .collapsible-header:active {
@@ -267,17 +270,25 @@
 /* === Help / Markdown Guide === */
 .help-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
     gap: var(--space-xl);
     margin-top: var(--space-lg);
+    max-width: none;
+    width: 100%;
 }
 
 .help-column {
     background: var(--bg-primary);
-    padding: var(--space-lg);
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border-light);
-    box-shadow: var(--shadow-subtle);
+    padding: var(--space-xl);
+    border-radius: var(--radius-lg);
+    border: 2px solid var(--border-medium);
+    box-shadow: var(--shadow-card);
+    transition: all var(--transition-normal);
+}
+
+.help-column:hover {
+    box-shadow: var(--shadow-elevated);
+    border-color: var(--primary-blue-light);
 }
 
 .help-section h5 {
@@ -301,83 +312,121 @@
 /* === Images Catalog === */
 .images-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: var(--space-lg);
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: var(--space-xl);
     margin-top: var(--space-xl);
+    max-width: none;
+    width: 100%;
 }
 
 .img-card {
     background: var(--bg-primary);
-    border: 1px solid var(--border-light);
+    border: 2px solid var(--border-medium);
     border-radius: var(--radius-lg);
-    padding: var(--space-md);
+    padding: var(--space-lg);
     display: flex;
     flex-direction: column;
-    gap: var(--space-sm);
+    gap: var(--space-md);
     box-shadow: var(--shadow-card);
     transition: all var(--transition-normal);
     position: relative;
+    min-height: 280px;
 }
 
 .img-card:hover {
     box-shadow: var(--shadow-elevated);
-    transform: translateY(-2px);
+    transform: translateY(-3px);
+    border-color: var(--primary-blue-light);
 }
 
 .img-thumb {
-    height: 120px;
+    height: 160px;
+    width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
     border-radius: var(--radius-md);
     background: var(--bg-tertiary);
-    border: 1px solid var(--border-light);
+    border: 2px solid var(--border-light);
+    position: relative;
 }
 
 .img-thumb img {
     max-width: 100%;
     max-height: 100%;
+    width: auto;
+    height: auto;
     object-fit: contain;
+    transition: transform var(--transition-normal);
+}
+
+.img-card:hover .img-thumb img {
+    transform: scale(1.05);
 }
 
 .img-meta {
-    font-size: var(--font-size-xs);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-size: var(--font-size-sm);
     color: var(--text-primary);
     font-weight: 600;
     font-family: var(--font-primary);
+    background: var(--bg-secondary);
+    padding: var(--space-sm);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-light);
+}
+
+.img-meta .filename {
+    font-weight: 700;
+    margin-bottom: var(--space-xs);
+    word-break: break-word;
+}
+
+.img-meta .created {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    font-weight: 500;
 }
 
 .img-size {
-    font-size: var(--font-size-xs);
-    color: var(--text-tertiary);
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    font-weight: 500;
+    text-align: center;
+    background: var(--bg-tertiary);
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-light);
 }
 
 .img-md {
-    font-size: var(--font-size-xs);
+    font-size: var(--font-size-sm);
     width: 100%;
-    padding: var(--space-sm);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-sm);
-    background: var(--bg-secondary);
+    min-height: 60px;
+    padding: var(--space-md);
+    border: 2px solid var(--border-light);
+    border-radius: var(--radius-md);
+    background: var(--bg-primary);
     font-family: var(--font-mono);
-    resize: none;
+    resize: vertical;
     transition: all var(--transition-fast);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    line-height: 1.4;
 }
 
 .img-md:focus {
     outline: none;
     border-color: var(--primary-blue);
     box-shadow: var(--shadow-focus);
+    background: var(--bg-primary);
 }
 
 .img-actions {
     display: flex;
-    gap: var(--space-sm);
-    margin-top: var(--space-xs);
+    gap: var(--space-md);
+    margin-top: var(--space-md);
+    justify-content: center;
 }
 
 /* === Modern Buttons === */
@@ -428,8 +477,10 @@
 }
 
 .btn-small {
-    padding: var(--space-xs) var(--space-md);
-    font-size: var(--font-size-xs);
+    padding: var(--space-sm) var(--space-lg);
+    font-size: var(--font-size-sm);
+    min-width: 100px;
+    font-weight: 600;
 }
 
 .btn-danger,
@@ -437,6 +488,7 @@
     background: var(--error);
     color: white;
     border-color: var(--error);
+    box-shadow: var(--shadow-subtle);
 }
 
 .btn-danger:hover,
@@ -670,10 +722,15 @@
     }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .images-grid {
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-        gap: var(--space-md);
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: var(--space-lg);
+    }
+
+    .help-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-lg);
     }
 
     .preview-content {
@@ -686,6 +743,21 @@
 
     .collapsible-header {
         padding: var(--space-md) var(--space-lg);
+    }
+}
+
+@media (max-width: 480px) {
+    .images-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-md);
+    }
+
+    .img-card {
+        min-height: 240px;
+    }
+
+    .img-thumb {
+        height: 140px;
     }
 }
 
@@ -985,6 +1057,8 @@ input[type="submit"].default:hover,
     background: var(--bg-secondary) !important;
     padding: var(--space-xl) !important;
     min-height: 100vh !important;
+    max-width: none !important;
+    width: 100% !important;
 }
 
 #content-main {
@@ -992,6 +1066,8 @@ input[type="submit"].default:hover,
     padding: var(--space-xl) !important;
     border-radius: var(--radius-lg) !important;
     box-shadow: var(--shadow-card) !important;
+    max-width: none !important;
+    width: 100% !important;
 }
 
 /* === Change Form Specific === */
@@ -1079,4 +1155,45 @@ body {
         padding: var(--space-sm) var(--space-md);
         font-size: var(--font-size-xs);
     }
+}
+
+/* === Additional Button Styles === */
+.btn-copy {
+    background: var(--success) !important;
+    border-color: var(--success) !important;
+    color: white !important;
+}
+
+.btn-copy:hover {
+    background: #059669 !important;
+    border-color: #059669 !important;
+}
+
+.btn-delete {
+    background: var(--error) !important;
+    border-color: var(--error) !important;
+    color: white !important;
+}
+
+.btn-delete:hover {
+    background: #dc2626 !important;
+    border-color: #dc2626 !important;
+}
+
+/* === Full Width Containers === */
+.collapsible-section,
+.preview-container,
+.images-grid,
+.help-grid {
+    max-width: none !important;
+    width: 100% !important;
+}
+
+/* === Improved Contrast === */
+.collapsible-section {
+    border: 2px solid var(--border-medium) !important;
+}
+
+.collapsible-section:hover {
+    border-color: var(--primary-blue-light) !important;
 }
