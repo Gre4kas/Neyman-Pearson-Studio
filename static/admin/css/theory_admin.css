@@ -1131,9 +1131,11 @@ body {
 
 #content,
 #content-main {
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 0 !important;
+    width: 75% !important; /* Устанавливаем 3/4 ширины экрана */
+    max-width: 75% !important;
+    margin-left: auto !important;
+    margin-right: 0 !important;
+    padding: var(--space-lg) !important;
 }
 
 .form-row .field-box,
@@ -1272,11 +1274,11 @@ fieldset,
 }
 
 .images-grid {
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)) !important;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)) !important;
 }
 
 .help-grid {
-    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)) !important;
+    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)) !important;
 }
 
 /* === КОНТЕЙНЕРЫ СЕКЦИЙ === */
@@ -1324,7 +1326,17 @@ fieldset {
     box-sizing: border-box !important;
 }
 
-/* === АДАПТИВНОСТЬ ДЛЯ МОБИЛЬНЫХ === */
+/* === АДАПТИВНОСТЬ ДЛЯ РАЗЛИЧНЫХ ЭКРАНОВ === */
+@media (min-width: 1600px) {
+    .images-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+    }
+    
+    .help-grid {
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)) !important;
+    }
+}
+
 @media (max-width: 1200px) {
     .images-grid {
         grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)) !important;
@@ -1332,6 +1344,12 @@ fieldset {
     
     .help-grid {
         grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)) !important;
+    }
+    
+    #content,
+    #content-main {
+        width: 85% !important;
+        max-width: 85% !important;
     }
 }
 
@@ -1344,6 +1362,14 @@ fieldset {
     
     .fullscreen-container {
         padding: var(--space-lg) !important;
+    }
+    
+    #content,
+    #content-main {
+        width: 95% !important;
+        max-width: 95% !important;
+        margin-left: 2.5% !important;
+        margin-right: 2.5% !important;
     }
     
     .fullscreen-content {
