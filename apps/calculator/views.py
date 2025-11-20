@@ -5,6 +5,61 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .forms import CalculatorForm
 from .services.neyman_pearson_solver import solve_neyman_pearson
 from .models import CalculationHistory
+from .forms import MatrixCalculatorForm
+from .services.matrix_solver import solve_strategy_matrix
+import json
+
+def matrix_calculator_page_view(request: HttpRequest) -> HttpResponse:
+    form = MatrixCalculatorForm()
+    history = []
+    if request.user.is_authenticated:
+        history = CalculationHistory.objects.filter(user=request.user).order_by('-created_at')[:5]
+
+    return render(request, "calculator/calculator_matrix_page.html", {"form": form, "history": history})
+
+def matrix_calculate_view(request: HttpRequest) -> HttpResponse:
+    if request.method == "POST":
+        form = MatrixCalculatorForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            try:
+                results = solve_strategy_matrix(
+                    data['strategies_input'],
+                    int(data['controlled_state']),
+                    data['L_star']
+                )
+                # Сохраняем в историю, преобразуя стратегии в JSON
+                if request.user.is_authenticated:
+                    # Преобразуем стратегии в JSON строку для хранения
+                    strategies_json = json.dumps(results['strategies'])
+                    CalculationHistory.objects.create(
+                        user=request.user,
+                        alpha=None,
+                        h0_params={"dist": "matrix_solver"},  # чтобы отличать от старого
+                        h1_params={"dist": "matrix_solver"},
+                        threshold=data['L_star'],
+                        power=results['best_J'],
+                        gamma=None,
+                        extra_data=strategies_json
+                    )
+
+                context = {"form": form, "results": results}
+                return render(request, "calculator/partials/matrix_results.html", context)
+            except Exception as e:
+                context = {"error": str(e)}
+                return render(request, "calculator/partials/matrix_results.html", context)
+        else:
+            error_texts = []
+            for field, errors in form.errors.items():
+                for err in errors:
+                    error_texts.append(f"{field}: {err}")
+            joined_errors = "; ".join(error_texts) or "Некорректні параметри"
+            context = {"error": f"error: {joined_errors}"}
+            return render(request, "calculator/partials/matrix_results.html", context)
+
+    form = MatrixCalculatorForm()
+    return render(request, "calculator/calculator_matrix_page.html", {"form": form})
+
 
 def calculator_page_view(request: HttpRequest) -> HttpResponse:
     form = CalculatorForm()

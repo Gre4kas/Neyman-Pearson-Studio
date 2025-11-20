@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Калькулятор (Матриці стратегій) - Neyman-Pearson Studio{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-4">
+        <h2>Параметри (Матриця стратегій)</h2>
+        <form hx-post="{% url 'calculator:matrix_calculate' %}" hx-target="#results-container" hx-indicator="#spinner"
+            class="d-flex flex-column gap-3" method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary">
+                Розрахувати
+                <span id="spinner" class="spinner-border spinner-border-sm htmx-indicator" role="status"></span>
+            </button>
+        </form>
+    </div>
+    <div class="col-lg-8">
+        <h2>Результати</h2>
+        <div id="results-container">
+            <div class="alert alert-info">
+                Заповніть параметри і натисніть "Розрахувати" для отримання результатів.
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if user.is_authenticated and history %}
+<div class="mt-5">
+    <h3>Останні 5 розрахунків (Матриця стратегій)</h3>
+    <div class="list-group">
+        {% for item in history %}
+        <div class="list-group-item">
+            <div class="d-flex w-100 justify-content-between">
+                <h6 class="mb-1">Тип: {{ item.h0_params.dist }}, Дата: {{ item.created_at|date:"d.m.Y" }}</h6>
+                <small>{{ item.created_at|date:"H:i" }}</small>
+            </div>
+            <p class="mb-1">L*: {{ item.threshold }}, Мінімальне J: {{ item.power }}</p>
+        </div>
+        {% endfor %}
+        <a href="{% url 'calculator:history' %}" class="list-group-item list-group-item-action text-center">
+            <strong>Подивитися всю історію</strong>
+        </a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
