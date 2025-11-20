@@ -1,0 +1,64 @@
+[33m088c04e[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mtranslate-page[m[33m, [m[1;31morigin/translate-page[m[33m)[m add practice app. test
+[33mc9bae68[m traslate page2
+[33ma98b693[m[33m ([m[1;32mmain[m[33m)[m переклад сайту
+[33mde35e57[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Merge pull request #16 from Gre4kas/NP-15-fix-docker
+[33m347687d[m fix docker
+[33mb1dca00[m fix static
+[33m7569a1a[m fix start docker
+[33m90a9173[m Merge pull request #15 from Gre4kas/NP-14-add-matlab
+[33m06ff55a[m add graph
+[33mc5a3068[m Merge pull request #14 from Gre4kas/NP-13-fix-review
+[33ma21f5ff[m Fix
+[33mac647cc[m Fix review
+[33m5de1e4e[m Merge pull request #13 from Gre4kas/NP-12-add-markdown-2
+[33mc43f73a[m Add MarkDown
+[33m63bcc6e[m Merge pull request #12 from Gre4kas/NP-11-fix-dublication-2
+[33m188f8cb[m test
+[33m66bb074[m Merge pull request #11 from Gre4kas/NP-10-list-images
+[33m92830b2[m add list image in admin panel
+[33m017a752[m Merge pull request #10 from Gre4kas/NP-9-change-to-markdown
+[33m41a48b5[m add new
+[33m30c1139[m add new
+[33md1f0698[m rollback markdown
+[33m20c4dd8[m check
+[33m7fbd24d[m Исправлено отображение изображений и таблиц в статьях теории
+[33mf5961b5[m Исправлен живой предпросмотр и убрана сохраненная версия из админки
+[33me688552[m little change
+[33mf521719[m fix
+[33m2ececd8[m Fix jQuery and CKEditor5 issues in admin
+[33m350889c[m Fix LaTeX support: Add custom LaTeX button and examples
+[33m20b8129[m Remove Markdown support, keep only CKEditor5 with LaTeX
+[33m2c29589[m add support LaTex
+[33m72af4ab[m Merge pull request #9 from Gre4kas/NP-8-add-redacotr-in-admin
+[33m5d000e4[m remove
+[33mfd2f3c4[m Add redactor in admin
+[33m62d01b1[m Merge pull request #8 from Gre4kas/NP-7-create-deploy
+[33mbc001ce[m Add docker
+[33me32b309[m Merge pull request #7 from Gre4kas/NP-6-create-test-calculator
+[33m5db7614[m update test
+[33meb756e2[m create test
+[33mcfefc5e[m Merge pull request #6 from Gre4kas/NP-5-update-interface
+[33m0a09635[m add markdown
+[33m245c674[m Merge pull request #5 from Gre4kas/NP-4-create-save-history-test
+[33ma16c37c[m create save history tests
+[33m50f8f9c[m Merge pull request #4 from Gre4kas/NP-3-create-save
+[33m290a25a[m add create save
+[33m3073018[m Merge pull request #3 from Gre4kas/NP-2-create-auth
+[33m7427e5d[m fix auth
+[33m07eb93c[m fix auth
+[33m33b54b8[m update auth
+[33m251c2b8[m update auth
+[33md921c9b[m add auth
+[33m9054e18[m Merge pull request #2 from Gre4kas/NP-create-guiz
+[33m74742c2[m little change
+[33m47e9eac[m little change
+[33me34b391[m little change
+[33m174ef3c[m fix template
+[33m574f870[m Add quiz
+[33m5b49cac[m Merge pull request #1 from Gre4kas/django-theory
+[33mabfbbb4[m Add theory
+[33m2302e2e[m Add Django migrations for all apps
+[33m763db71[m version 0.0.3
+[33me5eb8b3[m version 0.0.2
+[33m372f132[m version 0.0.1
+[33md70dd2a[m git init
