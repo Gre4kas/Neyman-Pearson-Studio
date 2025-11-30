@@ -1,63 +1,131 @@
 import numpy as np
-from scipy import stats
-from scipy.optimize import brentq
-from scipy.integrate import quad
-
-def get_distribution(dist_name, param1, param2):
-    """Возвращает объект распределения SciPy, проверяя допустимость параметров.
-
-    param2 для всех используемых распределений является scale / sigma / шириной и должен быть > 0.
-    """
-    if param2 <= 0:
-        raise ValueError("Параметр scale/σ/ширина має бути > 0")
-    if dist_name == 'norm':
-        return stats.norm(loc=param1, scale=param2)
-    if dist_name == 'uniform':
-        return stats.uniform(loc=param1, scale=param2)
-    if dist_name == 'expon':
-        return stats.expon(loc=param1, scale=param2)
-    raise ValueError(f"Не підтримує розподіл: {dist_name}")
 
 def solve_neyman_pearson(data: dict) -> dict:
-    """Основная логика критерия Неймана–Пирсона (упрощённый вариант).
+    matrix = np.array(data['matrix_input'])
+    l_star = data['l_star']
+    c_idx = int(data['controlled_state']) # 0 або 1
+    u_idx = 1 - c_idx                     # 1 або 0
+    
+    candidates = []
+    rows_count = matrix.shape[0]
 
-    Находит порог c такой, что P(X > c | H0) = alpha для одностороннего теста.
-    Возвращает словарь с порогом, мощностью и данными для визуализации.
-    """
-    alpha = data['alpha']
-    h0 = get_distribution(data['h0_dist'], data['h0_param1'], data['h0_param2'])
-    h1 = get_distribution(data['h1_dist'], data['h1_param1'], data['h1_param2'])
+    # --- ЕТАП 1: Пошук усіх можливих точок перетину з лінією L* ---
 
-    def find_c_func(c):
-        return h0.sf(c) - alpha
+    # 1. Перевіряємо змішані стратегії (розв'язуємо рівняння)
+    for i in range(rows_count):
+        for j in range(i + 1, rows_count):
+            c1 = matrix[i][c_idx]
+            c2 = matrix[j][c_idx]
+            
+            # Шукаємо перетин: одне значення >= L*, інше <= L*
+            if (c1 - l_star) * (c2 - l_star) <= 0:
+                # Уникаємо ділення на нуль
+                if abs(c1 - c2) < 1e-9:
+                    continue
+                    
+                # Формула з методички: x * c1 + (1-x) * c2 = l_star
+                x = (l_star - c2) / (c1 - c2)
+                
+                if 0 <= x <= 1:
+                    u1 = matrix[i][u_idx]
+                    u2 = matrix[j][u_idx]
+                    
+                    val_uncontrolled_mixed = x * u1 + (1 - x) * u2
+                    
+                    # Список ймовірностей (floats)
+                    probs = [0.0] * rows_count
+                    probs[i] = x
+                    probs[j] = 1 - x
 
-    try:
-        interval_start = h0.ppf(0.001)
-        interval_end = h0.ppf(0.999)
-        c_threshold = brentq(find_c_func, interval_start, interval_end)
-    except ValueError:
-        raise ValueError("Не вдалося знайти унікальний порог. Перевірте параметри розподілу и alpha.")
+                    # Координати
+                    mixed_p_x = x * matrix[i][0] + (1 - x) * matrix[j][0]
+                    mixed_p_y = x * matrix[i][1] + (1 - x) * matrix[j][1]
 
-    power = h1.sf(c_threshold)
-    gamma = 0.0  # В этой упрощённой реализации рандомизация не используется
+                    candidates.append({
+                        'type': 'Змішана',
+                        'probabilities': probs,
+                        'value_controlled': l_star,
+                        'value_uncontrolled': val_uncontrolled_mixed,
+                        'point': {'x': mixed_p_x, 'y': mixed_p_y},
+                        'parents': [
+                            {'x': matrix[i][0], 'y': matrix[i][1]}, 
+                            {'x': matrix[j][0], 'y': matrix[j][1]}
+                        ],
+                        'on_boundary': True
+                    })
 
-    x = np.linspace(
-        min(h0.ppf(0.001), h1.ppf(0.001)),
-        max(h0.ppf(0.999), h1.ppf(0.999)),
-        400
-    )
-    h0_pdf = h0.pdf(x)
-    h1_pdf = h1.pdf(x)
-    max_pdf = float(max(h0_pdf.max(), h1_pdf.max()))
+    # 2. Перевіряємо чисті стратегії (тільки ті, що на лінії L* або в "безпечній" зоні)
+    for i in range(rows_count):
+        val_controlled = matrix[i][c_idx]
+        val_uncontrolled = matrix[i][u_idx]
+        
+        # Точка на лінії L*
+        if abs(val_controlled - l_star) < 1e-5:
+            probs = [0.0] * rows_count
+            probs[i] = 1.0
+            candidates.append({
+                'type': 'Чиста',
+                'probabilities': probs,
+                'value_controlled': val_controlled,
+                'value_uncontrolled': val_uncontrolled,
+                'point': {'x': matrix[i][0], 'y': matrix[i][1]},
+                'on_boundary': True
+            })
+        # Точка строго менша за L*
+        elif val_controlled < l_star:
+             probs = [0.0] * rows_count
+             probs[i] = 1.0
+             candidates.append({
+                'type': 'Чиста (внутрішня)',
+                'probabilities': probs,
+                'value_controlled': val_controlled,
+                'value_uncontrolled': val_uncontrolled,
+                'point': {'x': matrix[i][0], 'y': matrix[i][1]},
+                'on_boundary': False
+            })
+
+    if not candidates:
+        raise ValueError("Розв'язок не знайдено (L* занадто мале або матриця некоректна).")
+
+    # --- ЕТАП 2: Вибір рішення як у методичці ---
+    
+    # Пріоритет: спочатку шукаємо ті, що 'on_boundary' (перетин з L*)
+    boundary_candidates = [c for c in candidates if c['on_boundary']]
+    
+    if boundary_candidates:
+        best_solution = min(boundary_candidates, key=lambda x: x['value_uncontrolled'])
+    else:
+        # Якщо перетинів немає, беремо найкращу внутрішню
+        best_solution = min(candidates, key=lambda x: x['value_uncontrolled'])
+
+    # Форматування тексту стратегій
+    strategies_text_parts = []
+    for idx, prob in enumerate(best_solution['probabilities']):
+        if prob > 0.001:
+            strategies_text_parts.append(f"{prob:.3f} (Стр. {idx + 1})")
+    strategies_text = ", ".join(strategies_text_parts)
+
+    # Дані для графіка
+    all_points = [{'x': row[0], 'y': row[1]} for row in matrix]
+    limit_line = {'value': l_star, 'axis': 'x' if c_idx == 0 else 'y'}
+    mixed_segment = best_solution.get('parents', [])
 
     return {
-        "threshold": round(c_threshold, 4),
-        "power": round(power, 4),
-        "gamma": round(gamma, 4),
+        "best_value": round(best_solution['value_uncontrolled'], 4),
+        "controlled_limit": l_star,
+        "controlled_col": c_idx + 1,
+        "strategies_text": strategies_text,
+        "matrix": matrix.tolist(),
+        "is_mixed": best_solution['type'] == 'Змішана',
+        "candidates": candidates,
+        
+        # ОСЬ ЦЕЙ РЯДОК БУВ ПРОПУЩЕНИЙ, Я ЙОГО ПОВЕРНУВ:
+        "full_probabilities": best_solution['probabilities'], 
+        
         "plot_data": {
-            "x": list(map(float, x)),
-            "h0_pdf": list(map(float, h0_pdf)),
-            "h1_pdf": list(map(float, h1_pdf)),
-            "max_pdf": max_pdf,
+            "all_points": all_points,
+            "solution_point": best_solution['point'],
+            "limit_line": limit_line,
+            "mixed_segment": mixed_segment
         }
     }

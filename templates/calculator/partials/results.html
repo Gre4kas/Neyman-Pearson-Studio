@@ -1,99 +1,206 @@
 {% if error %}
-<div class="alert alert-danger">{{ error }}</div>
-{% endif %}
+<div class="alert alert-danger d-flex align-items-center" role="alert">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+    <div><strong>Помилка:</strong> {{ error }}</div>
+</div>
+{% else %}
+<div class="animate__animated animate__fadeIn">
+    <div class="alert alert-success border-0 bg-success bg-opacity-10">
+        <h4 class="alert-heading text-success">Рішення знайдено!</h4>
+        <p class="mb-0">Отримано розв'язок на границі платіжної множини.</p>
+    </div>
 
-{% if results %}
-<div class="card">
-    <div class="card-body">
-        <h5 class="card-title">Висновки розрахунку</h5>
-        <ul class="list-group list-group-flush">
-            <li class="list-group-item"><strong>Порог (C):</strong> {{ results.threshold }}</li>
-            <li class="list-group-item"><strong>Потужність критерія (1-β):</strong> {{ results.power }}</li>
-            <li class="list-group-item"><strong>Коефіцієнт рандомізації (γ):</strong> {{ results.gamma }}</li>
-        </ul>
+    <div class="table-responsive mt-3">
+        <table class="table table-bordered text-center align-middle">
+            <thead class="table-light">
+                <tr><th>Параметр</th><th>Значення</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="text-start">Контрольований стан (Колонка {{ results.controlled_col }})</td>
+                    <td><strong>= {{ results.controlled_limit }}</strong></td>
+                </tr>
+                <tr>
+                    <td class="text-start">Значення іншого стану (Функція мети)</td>
+                    <td class="text-primary fw-bold fs-5">{{ results.best_value }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card bg-light mt-2 border-0">
+        <div class="card-body">
+            <h6 class="card-title text-uppercase text-muted small fw-bold">Оптимальна стратегія (p1, p2...)</h6>
+            <div class="d-flex align-items-center justify-content-between flex-wrap">
+                <span class="fs-5 font-monospace me-2">{{ results.strategies_text }}</span>
+                {% if results.is_mixed %}
+                    <span class="badge bg-warning text-dark">Змішана</span>
+                {% else %}
+                    <span class="badge bg-info text-dark">Чиста</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-header bg-white">
+            <h5 class="mb-0">Геометрична інтерпретація</h5>
+        </div>
+        <div class="card-body">
+            <div style="position: relative; height: 500px; width: 100%;">
+                <canvas id="payoffChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4 text-muted small">
+        <p class="mb-1">Введена матриця:</p>
+        <div class="font-monospace bg-light p-2 rounded d-inline-block">
+            {% for row in results.matrix %}
+            <div>{{ row }}</div>
+            {% endfor %}
+        </div>
     </div>
 </div>
 
-<style>
-    /* Увеличенный контейнер графика */
-    #chart-wrapper { min-height: 420px; position: relative; }
-    #chart-wrapper canvas { width: 100% !important; height: 100% !important; }
-</style>
-<div class="mt-4" id="chart-wrapper">
-    <canvas id="distributionsChart" data-threshold="{{ results.threshold }}"></canvas>
-</div>
-
-{# Надёжная передача JSON #}
-{{ results.plot_data|json_script:"plot-data" }}
+{{ results.plot_data|json_script:"plot-data-json" }}
 
 <script>
-    // Используем глобальную функцию если она определена (внешний файл), иначе fallback на inline
-    function initNPChart(){
-        const jsonNode = document.getElementById('plot-data');
-        const canvasEl = document.getElementById('distributionsChart');
-        if(!jsonNode || !canvasEl || !window.Chart){
-                console.warn('Chart init skipped: missing elements');
-                return;
-        }
-        const rawPlotData = JSON.parse(jsonNode.textContent);
-        const threshold = parseFloat('{{ results.threshold|floatformat:4 }}');
+    function initPayoffChart() {
+        const jsonNode = document.getElementById('plot-data-json');
+        const canvasEl = document.getElementById('payoffChart');
+        if (!jsonNode || !canvasEl) return;
+        
+        const data = JSON.parse(jsonNode.textContent);
         const ctx = canvasEl.getContext('2d');
 
-        if (window.neymanPearsonChart && typeof window.neymanPearsonChart.destroy === 'function') {
-            try { window.neymanPearsonChart.destroy(); } catch(e){ console.warn(e); }
+        if (window.myPayoffChart) window.myPayoffChart.destroy();
+
+        // 1. Всі лінії між точками
+        const connectionLines = [];
+        const rawPoints = data.all_points;
+        for (let i = 0; i < rawPoints.length; i++) {
+            for (let j = i + 1; j < rawPoints.length; j++) {
+                connectionLines.push(rawPoints[i]);
+                connectionLines.push(rawPoints[j]);
+                connectionLines.push({x: NaN, y: NaN});
+            }
         }
 
-        const drawThresholdPlugin = {
-            id: 'drawThresholdPlugin',
-            afterDraw(chart){
-                const xScale = chart.scales.x; const yScale = chart.scales.y;
-                if(!xScale||!yScale) return;
-                if(threshold < xScale.min || threshold > xScale.max) return;
-                const xPixel = xScale.getPixelForValue(threshold);
-                const c = chart.ctx; c.save();
-                c.strokeStyle='rgb(54,162,235)'; c.lineWidth=2; c.setLineDash([5,4]);
-                c.beginPath(); c.moveTo(xPixel,yScale.top); c.lineTo(xPixel,yScale.bottom); c.stroke();
-                c.fillStyle='rgb(54,162,235)'; c.font='13px sans-serif'; c.textAlign='left'; c.textBaseline='top';
-                c.fillText('Порог C = '+threshold, xPixel+6, yScale.top+6); c.restore();
+        // Лінія L*
+        const limitLinePlugin = {
+            id: 'limitLine',
+            beforeDraw: (chart) => {
+                const { ctx, chartArea: { top, bottom, left, right }, scales: { x, y } } = chart;
+                const limitVal = data.limit_line.value;
+                const axis = data.limit_line.axis;
+                ctx.save(); ctx.beginPath(); ctx.lineWidth = 2;
+                ctx.strokeStyle = 'rgba(220, 53, 69, 0.8)'; // Червоний
+                ctx.setLineDash([6, 4]);
+                
+                if (axis === 'x') {
+                    const xPos = x.getPixelForValue(limitVal);
+                    if (xPos >= left && xPos <= right) { ctx.moveTo(xPos, top); ctx.lineTo(xPos, bottom); }
+                } else {
+                    const yPos = y.getPixelForValue(limitVal);
+                    if (yPos >= top && yPos <= bottom) { ctx.moveTo(left, yPos); ctx.lineTo(right, yPos); }
+                }
+                ctx.stroke();
+                
+                // Текст L*
+                ctx.fillStyle = 'rgba(220, 53, 69, 1)';
+                ctx.font = 'bold 12px sans-serif';
+                if (axis === 'x') {
+                     const xPos = x.getPixelForValue(limitVal);
+                     if (xPos >= left && xPos <= right) ctx.fillText(`L*=${limitVal}`, xPos + 5, top + 15);
+                } else {
+                     const yPos = y.getPixelForValue(limitVal);
+                     if (yPos >= top && yPos <= bottom) ctx.fillText(`L*=${limitVal}`, left + 5, yPos - 5);
+                }
+                ctx.restore();
             }
         };
 
-        window.neymanPearsonChart = new Chart(ctx, {
+        const datasets = [];
+
+        // Сітка можливих рішень
+        datasets.push({
+            label: 'Можливі суміші',
+            data: connectionLines,
+            borderColor: 'rgba(200, 200, 200, 0.5)',
+            borderWidth: 1,
+            pointRadius: 0,
             type: 'line',
-            data: {
-                labels: rawPlotData.x,
-                datasets: [
-                    {label:'H₀ PDF', data: rawPlotData.h0_pdf, borderColor:'rgb(75,192,192)', tension:0.08, pointRadius:0},
-                    {label:'H₁ PDF', data: rawPlotData.h1_pdf, borderColor:'rgb(255,99,132)', tension:0.08, pointRadius:0}
-                ]
-            },
+            fill: false,
+            spanGaps: false,
+            order: 10
+        });
+
+        // Точки стратегій
+        datasets.push({
+            label: 'Стратегії',
+            data: data.all_points,
+            backgroundColor: 'rgba(54, 162, 235, 1)',
+            borderColor: 'white',
+            borderWidth: 1,
+            pointRadius: 6,
+            type: 'scatter',
+            order: 5
+        });
+
+        // Оптимальна лінія (Зелена)
+        if (data.mixed_segment && data.mixed_segment.length === 2) {
+            datasets.push({
+                label: 'Лінія розв\'язку',
+                data: data.mixed_segment,
+                borderColor: 'rgba(40, 167, 69, 1)',
+                borderWidth: 3,
+                showLine: true,
+                pointRadius: 0,
+                type: 'line',
+                fill: false,
+                order: 1
+            });
+        }
+
+        // Оптимальна точка (Зірка)
+        datasets.push({
+            label: 'Точка розв\'язку',
+            data: [data.solution_point],
+            backgroundColor: 'rgba(40, 167, 69, 1)',
+            borderColor: 'white',
+            borderWidth: 2,
+            pointRadius: 12,
+            pointStyle: 'star',
+            type: 'scatter',
+            order: 0
+        });
+
+        window.myPayoffChart = new Chart(ctx, {
+            data: { datasets: datasets },
             options: {
-                responsive:true, maintainAspectRatio:false,
-                interaction:{mode:'nearest', intersect:false},
-                plugins:{ title:{display:true, text:'щільності f₀(x) и f₁(x)'}, legend:{position:'bottom'}, tooltip:{enabled:true}},
-                scales:{
-                    x:{type:'linear', title:{display:true, text:'x'}},
-                    y:{title:{display:true, text:'щільность'}, beginAtZero:true, suggestedMax: rawPlotData.max_pdf*1.15}
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { type: 'linear', position: 'bottom', title: {display: true, text: 'L1 (1-й стовпець)'} },
+                    y: { title: {display: true, text: 'L2 (2-й стовпець)'} }
+                },
+                plugins: {
+                    legend: { position: 'bottom' },
+                    tooltip: {
+                        filter: function(item) { return item.datasetIndex !== 0; } // Ховаємо тултіпи сірих ліній
+                    }
                 }
             },
-            plugins:[drawThresholdPlugin]
+            plugins: [limitLinePlugin]
         });
-        }
-        // Первичная инициализация
-        try { initNPChart(); } catch(e){ console.error(e); }
+    }
 
-    // Повторная инициализация после htmx замены
-    document.addEventListener('htmx:afterSwap', function(evt){
-         if(evt.target && evt.target.id === 'results-container'){
-                // Даем DOM примениться
-                requestAnimationFrame(()=>{
-                    try { window.neymanPearsonChart && window.neymanPearsonChart.destroy(); } catch(e){}
-                    const scriptTags = document.querySelectorAll('#results-container script');
-                    // Найдём нашу самовызывающуюся функцию и перезапустим через eval безопасно
-                         // Если внешняя функция доступна — вызвать напрямую
-                         if(typeof initNPChart === 'function') { try { initNPChart(); } catch(e){ console.error(e); } }
-                });
-         }
+    requestAnimationFrame(initPayoffChart);
+    document.body.addEventListener('htmx:afterSwap', function(evt) {
+        if (evt.target.id === 'results-area') {
+            requestAnimationFrame(initPayoffChart);
+        }
     });
 </script>
 {% endif %}
