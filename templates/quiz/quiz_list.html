@@ -5,6 +5,11 @@
 {% block content %}
 <h1>оберіть тест</h1>
 <p class="lead">Перевірте свої знання, пройшовши один з доступних тестів.</p>
+<div class="mb-4">
+    <a href="{% url 'quiz:start_random' %}" class="btn btn-primary btn-lg w-100">
+        🎲 Пройти випадковий тест (10 питань)
+    </a>
+</div>
 
 <div class="list-group">
     {% for quiz in quizzes %}

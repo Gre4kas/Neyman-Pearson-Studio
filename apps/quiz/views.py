@@ -8,7 +8,8 @@ def get_session_keys(quiz_id):
     return f'quiz_{quiz_id}_questions', f'quiz_{quiz_id}_answers'
 
 def quiz_list_view(request: HttpRequest) -> HttpResponse:
-    quizzes = Quiz.objects.all()
+    # Ми використовуємо .exclude(), щоб прибрати тест з конкретною назвою зі списку
+    quizzes = Quiz.objects.exclude(title="Випадковий тест (10 питань)")
     return render(request, 'quiz/quiz_list.html', {'quizzes': quizzes})
 
 def quiz_start_view(request: HttpRequest, quiz_id: int) -> HttpResponse:
@@ -26,6 +27,37 @@ def quiz_start_view(request: HttpRequest, quiz_id: int) -> HttpResponse:
     
     first_question_id = question_ids[0]
     return redirect('quiz:question', quiz_id=quiz_id, question_id=first_question_id)
+
+# ... (существующие импорты)
+
+def start_random_test_view(request: HttpRequest) -> HttpResponse:
+    """
+    Запускает тест, состоящий из 10 случайных вопросов из общей базы.
+    Для сохранения результатов используется (или создается) специальный Quiz.
+    """
+    # 1. Получаем или создаем "контейнер" для случайного теста.
+    # Это нужно, чтобы у нас был quiz_id для сохранения результатов и работы ссылок.
+    quiz_title = "Випадковий тест (10 питань)"
+    quiz, created = Quiz.objects.get_or_create(title=quiz_title)
+
+    # 2. Выбираем 10 случайных ID вопросов из всей базы (order_by('?'))
+    # [:10] ограничивает выборку десятью штуками.
+    question_ids = list(Question.objects.order_by('?')[:10].values_list('id', flat=True))
+
+    if not question_ids:
+        # Если база пустая
+        return render(request, 'quiz/quiz_not_enough_questions.html', {'quiz': quiz})
+    
+    # 3. Стандартная логика инициализации сессии (как в quiz_start_view)
+    questions_key, answers_key = get_session_keys(quiz.id)
+
+    request.session[questions_key] = question_ids
+    request.session[answers_key] = {}
+    
+    first_question_id = question_ids[0]
+    
+    # 4. Редиректим на стандартное прохождение, передавая ID нашего "случайного" теста
+    return redirect('quiz:question', quiz_id=quiz.id, question_id=first_question_id)
 
 def question_view(request: HttpRequest, quiz_id: int, question_id: int) -> HttpResponse:
     questions_key, _ = get_session_keys(quiz_id)
